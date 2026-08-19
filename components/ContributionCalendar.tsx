@@ -54,16 +54,15 @@ function getCount(data: Record<string, number>, date: Date): number {
 function colorForCount(count: number): string {
   const thresholds = Object.keys(PANEL_COLORS)
     .map(Number)
-    .sort((a, b) => a - b);
-  let color = PANEL_COLORS[thresholds[0]];
+    .sort((a, b) => b - a);
+
   for (const threshold of thresholds) {
-    if (threshold > count) {
-      color = PANEL_COLORS[threshold];
-      break;
+    if (count >= threshold) {
+      return PANEL_COLORS[threshold];
     }
-    color = PANEL_COLORS[threshold];
   }
-  return color;
+
+  return PANEL_COLORS[0];
 }
 
 export function ContributionCalendar({ data }: Props) {
