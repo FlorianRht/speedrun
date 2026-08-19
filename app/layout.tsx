@@ -16,6 +16,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "MyPace",
   description: "Ton rythme, tes runs — suivi de progression speedrun, jeu par jeu.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export const viewport = {
