@@ -24,6 +24,8 @@ export type GameStats = {
   averageOverall: number | null;
   medianOverall: number | null;
   averageLast5: number | null;
+  averageLast10: number | null;
+  averageLast25: number | null;
   recordsByChapter: {
     name: string;
     best: number | null;
@@ -33,7 +35,7 @@ export type GameStats = {
     avgDeaths: number | null;
   }[];
   sumOfBest: number | null;
-  timeSave: number | null;
+  pbGain: number | null;
   stdDev: number | null;
   runsSinceLastPb: number;
   totalRuns: number;
@@ -62,6 +64,12 @@ export function computeGameStats(
 
   const last5 = times.slice(-5);
   const averageLast5 = last5.length ? last5.reduce((a, b) => a + b, 0) / last5.length : null;
+
+  const last10 = times.slice(-10);
+  const averageLast10 = last10.length ? last10.reduce((a, b) => a + b, 0) / last10.length : null;
+
+  const last25 = times.slice(-25);
+  const averageLast25 = last25.length ? last25.reduce((a, b) => a + b, 0) / last25.length : null;
 
   const introTimes = runs
     .map((run) => {
@@ -119,7 +127,20 @@ export function computeGameStats(
     ? recordsByChapter.reduce((sum, r) => sum + r.best!, 0)
     : null;
 
-  const timeSave = bestOverall !== null && sumOfBest !== null ? bestOverall - sumOfBest : null;
+  let pbGain: number | null = null;
+  if (bestOverall !== null && runs.length > 1) {
+    let currentBest = Infinity;
+    for (const run of runs) {
+      const t = Number(run.total_time_seconds);
+      if (t < currentBest) {
+        const oldBest = currentBest;
+        currentBest = t;
+        if (t === bestOverall && oldBest !== Infinity) {
+          pbGain = oldBest - t;
+        }
+      }
+    }
+  }
 
   const stdDev =
     times.length > 1
@@ -155,9 +176,11 @@ export function computeGameStats(
     averageOverall,
     medianOverall,
     averageLast5,
+    averageLast10,
+    averageLast25,
     recordsByChapter,
     sumOfBest,
-    timeSave,
+    pbGain,
     stdDev,
     runsSinceLastPb,
     totalRuns,

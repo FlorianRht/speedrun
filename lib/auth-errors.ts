@@ -19,6 +19,9 @@ export function authErrorMessage(message: string): string {
   if (normalized.includes("signup is disabled")) {
     return "Les inscriptions sont désactivées pour le moment.";
   }
+  if (normalized.includes("rate limit") || normalized.includes("email rate limit")) {
+    return "Trop de mails envoyés récemment. Réessaie dans une heure, ou désactive la confirmation email dans Supabase.";
+  }
 
   return message;
 }

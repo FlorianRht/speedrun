@@ -13,6 +13,8 @@ import { formatSeconds } from "@/lib/time";
 
 type Point = { date: string; seconds: number };
 
+const Y_MIN_SECONDS = 25 * 60;
+
 export function StatsChart({ data }: { data: Point[] }) {
   if (data.length === 0) {
     return (
@@ -22,10 +24,13 @@ export function StatsChart({ data }: { data: Point[] }) {
     );
   }
 
+  const maxSeconds = Math.max(...data.map((d) => d.seconds));
+  const yMax = Math.max(Y_MIN_SECONDS + 120, maxSeconds + 120);
+
   return (
-    <div className="w-full max-w-full overflow-hidden">
+    <div className="w-full max-w-full">
       <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={data} margin={{ top: 10, right: 4, left: 0, bottom: 0 }}>
+        <LineChart data={data} margin={{ top: 10, right: 8, left: 4, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
           <XAxis
             dataKey="date"
@@ -35,10 +40,11 @@ export function StatsChart({ data }: { data: Point[] }) {
             tickMargin={4}
           />
           <YAxis
-            fontSize={11}
+            fontSize={10}
             tick={{ fill: "var(--muted)" }}
             tickFormatter={(v) => formatSeconds(v)}
-            width={58}
+            domain={[Y_MIN_SECONDS, yMax]}
+            width={76}
           />
           <Tooltip
             formatter={(value: number) => [formatSeconds(value), "Temps"]}

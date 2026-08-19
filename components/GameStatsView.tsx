@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StatsChartLazy, ContributionCalendarLazy } from "@/components/ChartsLazy";
 import { formatSeconds, type GameStats } from "@/lib/stats";
 
@@ -28,43 +29,53 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
         </div>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted md:hidden">Résumé</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
-          <StatCard label="PB" fullLabel="PB (Personal Best)" value={formatSeconds(stats.bestOverall)} highlight />
-          <StatCard label="Sum of Best" value={formatSeconds(stats.sumOfBest)} />
-          <StatCard label="Time Save" fullLabel="Time Save potentiel" value={formatSeconds(stats.timeSave)} />
-          <StatCard label="Runs" fullLabel="Runs totales" value={String(stats.totalRuns)} />
-        </div>
-      </section>
+      <div className="card card-mobile space-y-6 md:space-y-7">
+        <StatSection title="Records">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
+            <StatCard label="PB" fullLabel="PB (Personal Best)" value={formatSeconds(stats.bestOverall)} highlight />
+            <StatCard label="Sum of Best" value={formatSeconds(stats.sumOfBest)} />
+            <StatCard
+              label="Gain PB"
+              fullLabel="Gain sur l'ancien PB"
+              value={stats.pbGain !== null ? formatSeconds(stats.pbGain) : "-"}
+            />
+            <StatCard label="Runs" fullLabel="Runs totales" value={String(stats.totalRuns)} />
+          </div>
+        </StatSection>
 
-      <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted md:hidden">Temps</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
-          <StatCard label="Moyenne" value={formatSeconds(stats.averageOverall)} />
-          <StatCard label="5 dernières" fullLabel="Moyenne (5 dernières)" value={formatSeconds(stats.averageLast5)} />
-          <StatCard label="Médiane" value={formatSeconds(stats.medianOverall)} />
-          <StatCard label="Pire" fullLabel="Pire temps" value={formatSeconds(stats.worstOverall)} />
-        </div>
-      </section>
+        <StatSection title="Temps globaux" bordered>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
+            <StatCard label="Moyenne" value={formatSeconds(stats.averageOverall)} />
+            <StatCard label="Médiane" value={formatSeconds(stats.medianOverall)} />
+            <StatCard label="Pire" fullLabel="Pire temps" value={formatSeconds(stats.worstOverall)} />
+            <StatCard label="Écart-type" value={formatSeconds(stats.stdDev)} />
+          </div>
+        </StatSection>
 
-      <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted md:hidden">Morts & régularité</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-4">
-          <StatCard label="Morts totales" value={String(stats.totalDeaths)} />
-          <StatCard
-            label="Morts/run"
-            fullLabel="Morts / run (moy.)"
-            value={stats.avgDeathsPerRun !== null ? stats.avgDeathsPerRun.toFixed(1) : "-"}
-          />
-          <StatCard label="Écart-type" value={formatSeconds(stats.stdDev)} />
-          <StatCard
-            label="Depuis PB"
-            fullLabel="Runs depuis dernier PB"
-            value={stats.totalRuns > 0 ? String(stats.runsSinceLastPb) : "-"}
-          />
-        </div>
-      </section>
+        <StatSection title="Forme récente" bordered>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
+            <StatCard label="5 dernières" fullLabel="Moyenne (5 dernières)" value={formatSeconds(stats.averageLast5)} />
+            <StatCard label="10 dernières" fullLabel="Moyenne (10 dernières)" value={formatSeconds(stats.averageLast10)} />
+            <StatCard label="25 dernières" fullLabel="Moyenne (25 dernières)" value={formatSeconds(stats.averageLast25)} />
+            <StatCard
+              label="Depuis PB"
+              fullLabel="Runs depuis dernier PB"
+              value={stats.totalRuns > 0 ? String(stats.runsSinceLastPb) : "-"}
+            />
+          </div>
+        </StatSection>
+
+        <StatSection title="Morts" bordered>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
+            <StatCard label="Morts totales" value={String(stats.totalDeaths)} />
+            <StatCard
+              label="Morts/run"
+              fullLabel="Morts / run (moy.)"
+              value={stats.avgDeathsPerRun !== null ? stats.avgDeathsPerRun.toFixed(1) : "-"}
+            />
+          </div>
+        </StatSection>
+      </div>
 
       <div className="card card-mobile">
         <h2 className="font-semibold font-display mb-3 md:mb-4 text-sm md:text-base">Activité</h2>
@@ -174,6 +185,25 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
   );
 }
 
+function StatSection({
+  title,
+  bordered,
+  children,
+}: {
+  title: string;
+  bordered?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section className={bordered ? "pt-6 md:pt-7 border-t border-border" : undefined}>
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted mb-2.5 md:mb-3">
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
 function StatCard({
   label,
   fullLabel,
@@ -186,10 +216,13 @@ function StatCard({
   highlight?: boolean;
 }) {
   return (
-    <div className="card card-mobile">
+    <div
+      className="rounded-xl p-3 md:p-4"
+      style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+    >
       <p className="text-[11px] md:text-xs text-muted leading-tight">
-        <span className="md:hidden">{label}</span>
-        <span className="hidden md:inline">{fullLabel ?? label}</span>
+        <span className="lg:hidden">{label}</span>
+        <span className="hidden lg:inline">{fullLabel ?? label}</span>
       </p>
       <p className={`text-lg md:text-xl font-bold mt-0.5 md:mt-1 font-mono ${highlight ? "text-berry" : ""}`}>
         {value}
