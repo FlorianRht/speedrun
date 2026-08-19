@@ -29,12 +29,13 @@ export default async function LeaderboardPage({
 
   const { data: runs } = await supabase
     .from("runs")
-    .select("user_id, total_time_seconds, total_deaths, run_date, category_id, categories(name)")
+    .select("id, user_id, total_time_seconds, total_deaths, run_date, category_id, categories(name)")
     .eq("game_id", game.id);
 
   const bestByUser = new Map<
     string,
     {
+      runId: string;
       time: number;
       deaths: number;
       date: string;
@@ -47,6 +48,7 @@ export default async function LeaderboardPage({
     const existing = bestByUser.get(run.user_id);
     if (!existing || time < existing.time) {
       bestByUser.set(run.user_id, {
+        runId: run.id,
         time,
         deaths: run.total_deaths ?? 0,
         date: run.run_date,
@@ -114,6 +116,14 @@ export default async function LeaderboardPage({
                   <span>{entry.category}</span>
                   <span>{new Date(entry.date).toLocaleDateString("fr-FR")}</span>
                 </div>
+                {!entry.isMe && (
+                  <Link
+                    href={`/${gameSlug}/runs/compare?b=${entry.runId}`}
+                    className="inline-block mt-2 text-xs text-berry hover:underline"
+                  >
+                    Comparer avec moi
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -135,7 +145,8 @@ export default async function LeaderboardPage({
               <th className="py-2 pr-2 font-medium w-[18%]">Temps</th>
               <th className="py-2 pr-2 font-medium w-[12%]">Morts</th>
               <th className="py-2 pr-2 font-medium w-[22%]">Catégorie</th>
-              <th className="py-2 pr-2 font-medium">Date</th>
+              <th className="py-2 pr-2 font-medium w-[18%]">Date</th>
+              <th className="py-2 pr-2 font-medium w-[14%]"></th>
             </tr>
           </thead>
           <tbody>
@@ -164,11 +175,21 @@ export default async function LeaderboardPage({
                 <td className="py-3 pr-2 text-muted truncate">
                   {new Date(entry.date).toLocaleDateString("fr-FR")}
                 </td>
+                <td className="py-3 pr-2">
+                  {!entry.isMe && (
+                    <Link
+                      href={`/${gameSlug}/runs/compare?b=${entry.runId}`}
+                      className="text-xs text-berry hover:underline whitespace-nowrap"
+                    >
+                      Comparer
+                    </Link>
+                  )}
+                </td>
               </tr>
             ))}
             {leaderboard.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-muted">
+                <td colSpan={7} className="py-8 text-center text-muted">
                   Aucune run enregistrée pour l'instant.
                 </td>
               </tr>

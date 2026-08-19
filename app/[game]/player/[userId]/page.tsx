@@ -2,7 +2,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { GameStatsView } from "@/components/GameStatsView";
-import { fetchGameBySlug, fetchUserGameStats, getSteamHeaderUrl } from "@/lib/game-data";
+import { PlayerRunsCompare } from "@/components/PlayerRunsCompare";
+import { fetchGameBySlug, fetchUserGameStats, fetchUserRunsList, getSteamHeaderUrl } from "@/lib/game-data";
 import { getProfile } from "@/lib/profiles";
 
 export default async function PlayerStatsPage({
@@ -25,6 +26,7 @@ export default async function PlayerStatsPage({
   if (!profile) notFound();
 
   const stats = await fetchUserGameStats(supabase, game.id, userId);
+  const playerRuns = await fetchUserRunsList(supabase, game.id, userId);
   const isMe = user.id === userId;
 
   return (
@@ -43,6 +45,13 @@ export default async function PlayerStatsPage({
         headerUrl={getSteamHeaderUrl(game.steam_app_id)}
         stats={stats}
         subtitle={`Stats de ${profile.username}${isMe ? " (toi)" : ""}`}
+      />
+
+      <PlayerRunsCompare
+        runs={playerRuns}
+        gameSlug={gameSlug}
+        username={profile.username}
+        isMe={isMe}
       />
 
       {!isMe && (
