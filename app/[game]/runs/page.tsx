@@ -1,10 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { formatSeconds } from "@/lib/time";
 import { DeleteRunButton } from "@/components/DeleteRunButton";
 
 export default async function RunsPage({ params }: { params: Promise<{ game: string }> }) {
   const { game: gameSlug } = await params;
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: game } = await supabase
     .from("games")
@@ -17,6 +23,7 @@ export default async function RunsPage({ params }: { params: Promise<{ game: str
     .from("runs")
     .select("id, run_date, total_time_seconds, total_deaths, comment, categories(name)")
     .eq("game_id", game.id)
+    .eq("user_id", user.id)
     .order("run_date", { ascending: false });
 
   return (

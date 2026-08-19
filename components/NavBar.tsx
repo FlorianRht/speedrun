@@ -46,6 +46,7 @@ export function NavBar({
 
         <nav className="flex items-center gap-1">
           <NavLink href={`/${gameSlug}`}>Stats</NavLink>
+          <NavLink href={`/${gameSlug}/leaderboard`}>Leaderboard</NavLink>
           <NavLink href={`/${gameSlug}/runs`}>Runs</NavLink>
           <Link
             href={`/${gameSlug}/add`}

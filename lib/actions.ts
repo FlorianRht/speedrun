@@ -2,17 +2,52 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { parseTimeToSeconds } from "@/lib/time";
+import {
+  createProfile,
+  isUsernameTaken,
+  normalizeUsername,
+  validateUsername,
+} from "@/lib/profiles";
+import { authErrorMessage } from "@/lib/auth-errors";
 import { redirect } from "next/navigation";
+
 export async function signUpWithEmail(formData: FormData) {
   const email = String(formData.get("email"));
   const password = String(formData.get("password"));
+  const username = normalizeUsername(String(formData.get("username")));
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({ email, password });
-  if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  const usernameError = validateUsername(username);
+  if (usernameError) {
+    redirect(`/login?error=${encodeURIComponent(usernameError)}`);
   }
-  redirect("/login?message=Compte cree, verifie tes mails pour confirmer.");
+
+  if (await isUsernameTaken(supabase, username)) {
+    redirect(`/login?error=${encodeURIComponent("Ce pseudo est déjà pris.")}`);
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { username } },
+  });
+
+  if (error) {
+    redirect(`/login?error=${encodeURIComponent(authErrorMessage(error.message))}`);
+  }
+
+  // Si confirmation email désactivée, session active → on crée le profil tout de suite
+  if (data.user && data.session) {
+    const { error: profileError } = await createProfile(supabase, data.user.id, username);
+    if (profileError) {
+      redirect(`/login?error=${encodeURIComponent("Erreur lors de la création du profil.")}`);
+    }
+    redirect("/celeste");
+  }
+
+  redirect(
+    `/login?message=${encodeURIComponent("Compte créé, vérifie tes mails pour confirmer.")}`
+  );
 }
 
 export async function signInWithEmail(formData: FormData) {
@@ -22,7 +57,7 @@ export async function signInWithEmail(formData: FormData) {
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(`/login?error=${encodeURIComponent(authErrorMessage(error.message))}`);
   }
   redirect("/celeste");
 }

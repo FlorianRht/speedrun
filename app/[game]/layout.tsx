@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { NavBar } from "@/components/NavBar";
+import { ensureProfile } from "@/lib/profiles";
 
 export default async function GameLayout({
   children,
@@ -16,6 +17,8 @@ export default async function GameLayout({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  await ensureProfile(supabase, user);
 
   const { data: game } = await supabase
     .from("games")

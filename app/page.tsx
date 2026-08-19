@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "@/lib/actions";
+import { ensureProfile } from "@/lib/profiles";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -10,6 +11,8 @@ export default async function HomePage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  await ensureProfile(supabase, user);
 
   const { data: games } = await supabase.from("games").select("slug, name, steam_app_id").order("name");
 

@@ -46,6 +46,20 @@ export default async function LoginPage({
             </summary>
             <div className="space-y-3 mt-3">
               <div>
+                <label className="label">Pseudo</label>
+                <input
+                  className="input"
+                  type="text"
+                  name="username"
+                  required
+                  minLength={3}
+                  maxLength={20}
+                  pattern="[a-zA-Z0-9_]+"
+                  autoComplete="username"
+                />
+                <p className="text-xs text-muted mt-1">3-20 caractères, lettres, chiffres et _ uniquement</p>
+              </div>
+              <div>
                 <label className="label">Email</label>
                 <input className="input" type="email" name="email" required />
               </div>

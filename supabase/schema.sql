@@ -33,6 +33,13 @@ create table if not exists chapters (
   unique (game_id, name)
 );
 
+-- --- Profils joueurs (pseudo public) ---
+create table if not exists profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text unique not null,
+  created_at timestamptz default now()
+);
+
 -- --- Runs (une ligne = une run terminée) ---
 create table if not exists runs (
   id uuid primary key default gen_random_uuid(),
@@ -61,28 +68,40 @@ create table if not exists run_splits (
 -- Row Level Security
 -- ============================================================
 
+alter table profiles enable row level security;
 alter table games enable row level security;
 alter table categories enable row level security;
 alter table chapters enable row level security;
 alter table runs enable row level security;
 alter table run_splits enable row level security;
 
+-- Profils : lecture publique, écriture sur son propre profil
+create policy "public read profiles" on profiles for select using (true);
+create policy "users insert own profile" on profiles for insert with check (auth.uid() = id);
+create policy "users update own profile" on profiles for update using (auth.uid() = id);
+
 -- Référentiels (jeux/catégories/chapitres) : lecture publique, écriture par personne côté app
 create policy "public read games" on games for select using (true);
 create policy "public read categories" on categories for select using (true);
 create policy "public read chapters" on chapters for select using (true);
 
--- Runs : chacun ne voit / modifie que les siennes
-create policy "users manage own runs" on runs
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- Runs : lecture pour tous les utilisateurs connectés, écriture sur ses propres runs
+create policy "authenticated read runs" on runs for select using (auth.uid() is not null);
+create policy "users insert own runs" on runs for insert with check (auth.uid() = user_id);
+create policy "users update own runs" on runs for update using (auth.uid() = user_id);
+create policy "users delete own runs" on runs for delete using (auth.uid() = user_id);
 
--- Splits : rattachés à une run qui doit appartenir à l'utilisateur
-create policy "users manage own run_splits" on run_splits
-  for all using (
-    exists (select 1 from runs where runs.id = run_splits.run_id and runs.user_id = auth.uid())
-  ) with check (
-    exists (select 1 from runs where runs.id = run_splits.run_id and runs.user_id = auth.uid())
-  );
+-- Splits : lecture pour tous, écriture si la run appartient à l'utilisateur
+create policy "authenticated read run_splits" on run_splits for select using (auth.uid() is not null);
+create policy "users insert own run_splits" on run_splits for insert with check (
+  exists (select 1 from runs where runs.id = run_splits.run_id and runs.user_id = auth.uid())
+);
+create policy "users update own run_splits" on run_splits for update using (
+  exists (select 1 from runs where runs.id = run_splits.run_id and runs.user_id = auth.uid())
+);
+create policy "users delete own run_splits" on run_splits for delete using (
+  exists (select 1 from runs where runs.id = run_splits.run_id and runs.user_id = auth.uid())
+);
 
 -- ============================================================
 -- Seed : Celeste
