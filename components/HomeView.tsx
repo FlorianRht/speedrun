@@ -154,6 +154,12 @@ function GameCard({ game, featured }: { game: HomeGame; featured?: boolean }) {
             Voir mes stats
           </Link>
           <Link
+            href={`/${game.slug}/leaderboard`}
+            className="btn-secondary text-sm px-4 py-2 min-h-0"
+          >
+            Leaderboard
+          </Link>
+          <Link
             href={`/${game.slug}/add`}
             className="btn-secondary text-sm px-4 py-2 min-h-0"
           >
