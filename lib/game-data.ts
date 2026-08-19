@@ -17,7 +17,7 @@ export async function fetchUserGameStats(
 ) {
   const { data: runs } = await supabase
     .from("runs")
-    .select("id, run_date, total_time_seconds, total_deaths")
+    .select("id, run_date, total_time_seconds, total_deaths, intro_time_seconds")
     .eq("game_id", gameId)
     .eq("user_id", userId)
     .order("run_date", { ascending: true });

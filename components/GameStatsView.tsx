@@ -150,14 +150,20 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
                     : "-"}
                 </td>
                 <td className="py-3 text-right font-mono">
-                  {stats.recordsByChapter.every((r) => r.bestDeaths !== null)
-                    ? stats.recordsByChapter.reduce((s, r) => s + r.bestDeaths!, 0)
-                    : "-"}
+                  {(() => {
+                    const withDeaths = stats.recordsByChapter.filter((r) => r.bestDeaths !== null);
+                    return withDeaths.length
+                      ? withDeaths.reduce((s, r) => s + r.bestDeaths!, 0)
+                      : "-";
+                  })()}
                 </td>
                 <td className="py-3 text-right font-mono">
-                  {stats.recordsByChapter.every((r) => r.avgDeaths !== null)
-                    ? stats.recordsByChapter.reduce((s, r) => s + r.avgDeaths!, 0).toFixed(1)
-                    : "-"}
+                  {(() => {
+                    const withDeaths = stats.recordsByChapter.filter((r) => r.avgDeaths !== null);
+                    return withDeaths.length
+                      ? withDeaths.reduce((s, r) => s + r.avgDeaths!, 0).toFixed(1)
+                      : "-";
+                  })()}
                 </td>
               </tr>
             </tbody>

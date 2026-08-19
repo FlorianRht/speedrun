@@ -5,6 +5,7 @@ type Run = {
   run_date: string;
   total_time_seconds: number;
   total_deaths: number | null;
+  intro_time_seconds?: number | null;
 };
 
 type Chapter = { id: string; name: string; sort_order: number };
@@ -62,7 +63,38 @@ export function computeGameStats(
   const last5 = times.slice(-5);
   const averageLast5 = last5.length ? last5.reduce((a, b) => a + b, 0) / last5.length : null;
 
-  const recordsByChapter = chapters.map((chapter) => {
+  const introTimes = runs
+    .map((run) => {
+      const runSplits = splits.filter((s) => s.run_id === run.id);
+      const sumSplits = runSplits.reduce((sum, s) => sum + (s.time_seconds ?? 0), 0);
+
+      if (sumSplits > 0) {
+        const intro = Number(run.total_time_seconds) - sumSplits;
+        return intro > 0 ? intro : null;
+      }
+
+      if (run.intro_time_seconds != null && run.intro_time_seconds > 0) {
+        return Number(run.intro_time_seconds);
+      }
+
+      return null;
+    })
+    .filter((t): t is number => t !== null);
+
+  const introRecord = {
+    name: "Intro",
+    best: introTimes.length ? Math.min(...introTimes) : null,
+    worst: introTimes.length ? Math.max(...introTimes) : null,
+    avg: introTimes.length
+      ? introTimes.reduce((a, b) => a + b, 0) / introTimes.length
+      : null,
+    bestDeaths: null as number | null,
+    avgDeaths: null as number | null,
+  };
+
+  const recordsByChapter = [
+    introRecord,
+    ...chapters.map((chapter) => {
     const chapterSplits = splits.filter(
       (s) => s.chapter_id === chapter.id && s.time_seconds !== null
     );
@@ -80,7 +112,8 @@ export function computeGameStats(
       : null;
 
     return { name: chapter.name, best, worst, avg, bestDeaths, avgDeaths };
-  });
+    }),
+  ];
 
   const sumOfBest = recordsByChapter.every((r) => r.best !== null)
     ? recordsByChapter.reduce((sum, r) => sum + r.best!, 0)
