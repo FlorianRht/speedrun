@@ -91,3 +91,66 @@ select.input option {
   @apply block text-sm font-medium mb-1;
   color: var(--muted);
 }
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-enter {
+  opacity: 0;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-enter {
+    opacity: 1;
+  }
+
+  .animate-fade-in-up,
+  .animate-fade-in {
+    animation: none;
+  }
+
+  .animate-stat-pop {
+    animation: none;
+  }
+}
+
+@keyframes stat-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-stat-pop {
+  animation: stat-pop 0.4s ease-out;
+}

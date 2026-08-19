@@ -1,6 +1,18 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { StatsChartLazy, ContributionCalendarLazy } from "@/components/ChartsLazy";
+import { AnimatedValue } from "@/components/ui/AnimatedValue";
 import { formatSeconds, type GameStats } from "@/lib/stats";
+
+const STATS_BASE = 80;
+const STATS_STEP = 42;
+const BLOCK_ACTIVITY = 520;
+const BLOCK_CHART = 580;
+const BLOCK_CHAPTERS = 640;
+const CHAPTER_STEP = 35;
+
+function animDelay(ms: number): CSSProperties {
+  return { animationDelay: `${ms}ms` };
+}
 
 type Props = {
   gameName: string;
@@ -12,7 +24,10 @@ type Props = {
 export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
   return (
     <div className="space-y-5 md:space-y-8 min-w-0 max-w-full overflow-hidden">
-      <div className="relative rounded-xl md:rounded-2xl overflow-hidden h-36 sm:h-44 md:h-64">
+      <div
+        className="animate-enter animate-fade-in-up relative rounded-xl md:rounded-2xl overflow-hidden h-36 sm:h-44 md:h-64"
+        style={animDelay(0)}
+      >
         {headerUrl && (
           <img
             src={headerUrl}
@@ -30,73 +45,77 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
       </div>
 
       <div className="card card-mobile space-y-6 md:space-y-7">
-        <StatSection title="Records">
+        <StatSection title="Records" titleDelay={STATS_BASE}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
-            <StatCard label="PB" fullLabel="PB (Personal Best)" value={formatSeconds(stats.bestOverall)} highlight />
-            <StatCard label="Sum of Best" value={formatSeconds(stats.sumOfBest)} />
-            <StatCard
-              label="Gain PB"
-              fullLabel="Gain sur l'ancien PB"
-              value={stats.pbGain !== null ? formatSeconds(stats.pbGain) : "-"}
-            />
-            <StatCard label="Runs" fullLabel="Runs totales" value={String(stats.totalRuns)} />
+            <StatCard delay={0} label="PB" fullLabel="PB (Personal Best)" amount={stats.bestOverall} amountType="time" highlight />
+            <StatCard delay={1} label="Sum of Best" amount={stats.sumOfBest} amountType="time" />
+            <StatCard delay={2} label="Gain PB" fullLabel="Gain sur l'ancien PB" amount={stats.pbGain} amountType="time" />
+            <StatCard delay={3} label="Runs" fullLabel="Runs totales" amount={stats.totalRuns} amountType="integer" />
           </div>
         </StatSection>
 
-        <StatSection title="Temps globaux" bordered>
+        <StatSection title="Temps globaux" bordered titleDelay={STATS_BASE + STATS_STEP * 4}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
-            <StatCard label="Moyenne" value={formatSeconds(stats.averageOverall)} />
-            <StatCard label="Médiane" value={formatSeconds(stats.medianOverall)} />
-            <StatCard label="Pire" fullLabel="Pire temps" value={formatSeconds(stats.worstOverall)} />
-            <StatCard label="Écart-type" value={formatSeconds(stats.stdDev)} />
+            <StatCard delay={4} label="Moyenne" amount={stats.averageOverall} amountType="time" />
+            <StatCard delay={5} label="Médiane" amount={stats.medianOverall} amountType="time" />
+            <StatCard delay={6} label="Pire" fullLabel="Pire temps" amount={stats.worstOverall} amountType="time" />
+            <StatCard delay={7} label="Écart-type" amount={stats.stdDev} amountType="time" />
           </div>
         </StatSection>
 
-        <StatSection title="Forme récente" bordered>
+        <StatSection title="Forme récente" bordered titleDelay={STATS_BASE + STATS_STEP * 8}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
-            <StatCard label="5 dernières" fullLabel="Moyenne (5 dernières)" value={formatSeconds(stats.averageLast5)} />
-            <StatCard label="10 dernières" fullLabel="Moyenne (10 dernières)" value={formatSeconds(stats.averageLast10)} />
-            <StatCard label="25 dernières" fullLabel="Moyenne (25 dernières)" value={formatSeconds(stats.averageLast25)} />
+            <StatCard delay={8} label="5 dernières" fullLabel="Moyenne (5 dernières)" amount={stats.averageLast5} amountType="time" />
+            <StatCard delay={9} label="10 dernières" fullLabel="Moyenne (10 dernières)" amount={stats.averageLast10} amountType="time" />
+            <StatCard delay={10} label="25 dernières" fullLabel="Moyenne (25 dernières)" amount={stats.averageLast25} amountType="time" />
             <StatCard
+              delay={11}
               label="Depuis PB"
               fullLabel="Runs depuis dernier PB"
-              value={stats.totalRuns > 0 ? String(stats.runsSinceLastPb) : "-"}
+              amount={stats.totalRuns > 0 ? stats.runsSinceLastPb : null}
+              amountType="integer"
             />
           </div>
         </StatSection>
 
-        <StatSection title="Morts" bordered>
+        <StatSection title="Morts" bordered titleDelay={STATS_BASE + STATS_STEP * 12}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3">
-            <StatCard label="Morts totales" value={String(stats.totalDeaths)} />
+            <StatCard delay={12} label="Morts totales" amount={stats.totalDeaths} amountType="integer" />
             <StatCard
+              delay={13}
               label="Morts/run"
               fullLabel="Morts / run (moy.)"
-              value={stats.avgDeathsPerRun !== null ? stats.avgDeathsPerRun.toFixed(1) : "-"}
+              amount={stats.avgDeathsPerRun}
+              amountType="decimal"
+              decimals={1}
             />
           </div>
         </StatSection>
       </div>
 
-      <div className="card card-mobile">
+      <div className="animate-enter animate-fade-in-up card card-mobile" style={animDelay(BLOCK_ACTIVITY)}>
         <h2 className="font-semibold font-display mb-3 md:mb-4 text-sm md:text-base">Activité</h2>
         <ContributionCalendarLazy data={stats.runsPerDay} />
       </div>
 
-      <div className="card card-mobile">
+      <div className="animate-enter animate-fade-in-up card card-mobile" style={animDelay(BLOCK_CHART)}>
         <h2 className="font-semibold font-display mb-3 md:mb-4 text-sm md:text-base">Évolution du temps final</h2>
         <StatsChartLazy data={stats.chartData} />
       </div>
 
-      <div className="card card-mobile">
+      <div className="animate-enter animate-fade-in-up card card-mobile" style={animDelay(BLOCK_CHAPTERS)}>
         <h2 className="font-semibold font-display mb-3 md:mb-4 text-sm md:text-base">Détail par chapitre</h2>
 
-        {/* Mobile / tablet: cards */}
         <div className="lg:hidden space-y-2">
-          {stats.recordsByChapter.map((r) => (
+          {stats.recordsByChapter.map((r, i) => (
             <div
               key={r.name}
-              className="rounded-xl p-3 space-y-2"
-              style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+              className="animate-enter animate-fade-in-up rounded-xl p-3 space-y-2"
+              style={{
+                ...animDelay(BLOCK_CHAPTERS + 60 + i * CHAPTER_STEP),
+                background: "var(--background)",
+                border: "1px solid var(--card-border)",
+              }}
             >
               <p className="font-medium text-sm">{r.name}</p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
@@ -109,15 +128,18 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
             </div>
           ))}
           <div
-            className="rounded-xl p-3 font-medium text-sm"
-            style={{ background: "color-mix(in srgb, var(--berry) 8%, var(--card))", border: "1px solid var(--card-border)" }}
+            className="animate-enter animate-fade-in-up rounded-xl p-3 font-medium text-sm"
+            style={{
+              ...animDelay(BLOCK_CHAPTERS + 60 + stats.recordsByChapter.length * CHAPTER_STEP),
+              background: "color-mix(in srgb, var(--berry) 8%, var(--card))",
+              border: "1px solid var(--card-border)",
+            }}
           >
             <p className="mb-1.5">Total (Sum of Best)</p>
             <p className="font-mono text-berry">{formatSeconds(stats.sumOfBest)}</p>
           </div>
         </div>
 
-        {/* Desktop: table */}
         <div className="hidden lg:block max-w-full overflow-hidden">
           <table className="w-full table-fixed text-sm">
             <thead>
@@ -131,8 +153,12 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {stats.recordsByChapter.map((r) => (
-                <tr key={r.name}>
+              {stats.recordsByChapter.map((r, i) => (
+                <tr
+                  key={r.name}
+                  className="animate-enter animate-fade-in"
+                  style={animDelay(BLOCK_CHAPTERS + 60 + i * CHAPTER_STEP)}
+                >
                   <td className="py-3 text-muted truncate pr-2">{r.name}</td>
                   <td className="py-3 text-right font-mono font-medium text-berry">
                     {formatSeconds(r.best)}
@@ -145,7 +171,10 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
                   </td>
                 </tr>
               ))}
-              <tr className="font-medium border-t border-border">
+              <tr
+                className="animate-enter animate-fade-in font-medium border-t border-border"
+                style={animDelay(BLOCK_CHAPTERS + 60 + stats.recordsByChapter.length * CHAPTER_STEP)}
+              >
                 <td className="py-3">Total (Sum of Best)</td>
                 <td className="py-3 text-right font-mono text-berry">
                   {formatSeconds(stats.sumOfBest)}
@@ -188,15 +217,24 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
 function StatSection({
   title,
   bordered,
+  titleDelay,
   children,
 }: {
   title: string;
   bordered?: boolean;
+  titleDelay?: number;
   children: ReactNode;
 }) {
   return (
     <section className={bordered ? "pt-6 md:pt-7 border-t border-border" : undefined}>
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-muted mb-2.5 md:mb-3">
+      <h2
+        className={
+          titleDelay !== undefined
+            ? "animate-enter animate-fade-in-up text-xs font-semibold uppercase tracking-wide text-muted mb-2.5 md:mb-3"
+            : "text-xs font-semibold uppercase tracking-wide text-muted mb-2.5 md:mb-3"
+        }
+        style={titleDelay !== undefined ? animDelay(titleDelay) : undefined}
+      >
         {title}
       </h2>
       {children}
@@ -207,26 +245,43 @@ function StatSection({
 function StatCard({
   label,
   fullLabel,
-  value,
+  amount,
+  amountType,
+  decimals,
   highlight,
+  delay = 0,
 }: {
   label: string;
   fullLabel?: string;
-  value: string;
+  amount: number | null;
+  amountType: "time" | "integer" | "decimal";
+  decimals?: number;
   highlight?: boolean;
+  delay?: number;
 }) {
+  const cardDelay = STATS_BASE + delay * STATS_STEP;
+
   return (
     <div
-      className="rounded-xl p-3 md:p-4"
-      style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+      className="animate-enter animate-fade-in-up rounded-xl p-3 md:p-4"
+      style={{
+        ...animDelay(cardDelay),
+        background: "var(--background)",
+        border: "1px solid var(--card-border)",
+      }}
     >
       <p className="text-[11px] md:text-xs text-muted leading-tight">
         <span className="lg:hidden">{label}</span>
         <span className="hidden lg:inline">{fullLabel ?? label}</span>
       </p>
-      <p className={`text-lg md:text-xl font-bold mt-0.5 md:mt-1 font-mono ${highlight ? "text-berry" : ""}`}>
-        {value}
-      </p>
+      <AnimatedValue
+        value={amount}
+        type={amountType}
+        decimals={decimals}
+        delay={cardDelay + 280}
+        highlight={highlight}
+        className={`text-lg md:text-xl font-bold mt-0.5 md:mt-1 font-mono ${highlight ? "text-berry" : ""}`}
+      />
     </div>
   );
 }
