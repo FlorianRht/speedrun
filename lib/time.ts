@@ -1,5 +1,5 @@
 /**
- * Parse un temps tapé comme en jeu : "34:16.830" (mm:ss.cc) ou "1:27:51.938" (h:mm:ss.cc)
+ * Parse un temps tapé comme en jeu : "34:16.830" (mm:ss.SSS) ou "1:27:51.938" (h:mm:ss.SSS)
  * en un nombre total de secondes.
  */
 export function parseTimeToSeconds(input: string): number | null {
@@ -26,7 +26,7 @@ export function parseTimeToSeconds(input: string): number | null {
 }
 
 /**
- * Formate un nombre de secondes en "mm:ss.cc", ou "h:mm:ss.cc" si >= 1h.
+ * Formate un nombre de secondes en "mm:ss.SSS", ou "h:mm:ss.SSS" si >= 1h.
  */
 export function formatSeconds(totalSeconds: number | null | undefined): string {
   if (totalSeconds === null || totalSeconds === undefined || Number.isNaN(totalSeconds)) {
@@ -35,7 +35,7 @@ export function formatSeconds(totalSeconds: number | null | undefined): string {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  const secStr = seconds.toFixed(2).padStart(5, "0");
+  const secStr = seconds.toFixed(3).padStart(6, "0");
 
   if (hours > 0) {
     return `${hours}:${String(minutes).padStart(2, "0")}:${secStr}`;

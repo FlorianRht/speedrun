@@ -105,7 +105,7 @@ export async function addRun(formData: FormData) {
 
   const totalTimeSeconds = parseTimeToSeconds(totalTimeText);
   if (totalTimeSeconds === null) {
-    throw new Error("Format de temps invalide (attendu: mm:ss.cc ou h:mm:ss.cc)");
+    throw new Error("Format de temps invalide (attendu: mm:ss.SSS ou h:mm:ss.SSS)");
   }
 
   // Récupère les chapitres du jeu pour lire les champs dynamiques du form

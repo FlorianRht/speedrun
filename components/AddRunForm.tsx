@@ -143,7 +143,7 @@ export function AddRunForm({
                       className="input font-mono text-sm !py-2 !px-2"
                       type="text"
                       name={`chapter_time_${chapter.id}`}
-                      placeholder="mm:ss.cc"
+                      placeholder="mm:ss.SSS"
                       value={chapterData[chapter.id]?.time ?? ""}
                       onChange={(e) =>
                         setChapterData((prev) => ({
@@ -200,7 +200,7 @@ export function AddRunForm({
                   className="input font-mono text-sm !py-1.5 !px-2"
                   type="text"
                   name={`chapter_time_${chapter.id}`}
-                  placeholder="mm:ss.cc"
+                  placeholder="mm:ss.SSS"
                   value={chapterData[chapter.id]?.time ?? ""}
                   onChange={(e) =>
                     setChapterData((prev) => ({
