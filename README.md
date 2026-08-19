@@ -1,4 +1,4 @@
-# Speedrun Tracker
+# MyPace
 
 Suivi de progression pour tes speedruns (Celeste pour l'instant, pensé pour
 accueillir d'autres jeux plus tard). Next.js + Supabase (DB + auth), déployable

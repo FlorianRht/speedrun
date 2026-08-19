@@ -3,8 +3,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseTimeToSeconds } from "@/lib/time";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-
 export async function signUpWithEmail(formData: FormData) {
   const email = String(formData.get("email"));
   const password = String(formData.get("password"));
@@ -14,7 +12,7 @@ export async function signUpWithEmail(formData: FormData) {
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
-  redirect("/login?message=Compte créé, vérifie tes mails pour confirmer.");
+  redirect("/login?message=Compte cree, verifie tes mails pour confirmer.");
 }
 
 export async function signInWithEmail(formData: FormData) {
@@ -29,25 +27,25 @@ export async function signInWithEmail(formData: FormData) {
   redirect("/celeste");
 }
 
-export async function signInWithGoogle() {
-  const supabase = await createClient();
-  const origin = (await headers()).get("origin");
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: `${origin}/auth/callback` },
-  });
-
-  if (error || !data.url) {
-    redirect(`/login?error=${encodeURIComponent(error?.message ?? "Erreur Google")}`);
-  }
-  redirect(data.url);
-}
-
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+export async function deleteRun(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const runId = String(formData.get("runId"));
+  const gameSlug = String(formData.get("gameSlug"));
+
+  await supabase.from("runs").delete().eq("id", runId).eq("user_id", user.id);
+
+  redirect(`/${gameSlug}/runs`);
 }
 
 export async function addRun(formData: FormData) {
@@ -98,6 +96,10 @@ export async function addRun(formData: FormData) {
     });
   }
 
+  // Calcul du temps d'intro = temps total - somme des splits
+  const sumSplits = splitsPayload.reduce((sum, s) => sum + (s.time_seconds ?? 0), 0);
+  const introTime = sumSplits > 0 ? totalTimeSeconds - sumSplits : null;
+
   const { data: run, error: runError } = await supabase
     .from("runs")
     .insert({
@@ -106,6 +108,7 @@ export async function addRun(formData: FormData) {
       category_id: categoryId || null,
       run_date: runDate,
       total_time_seconds: totalTimeSeconds,
+      intro_time_seconds: introTime && introTime > 0 ? introTime : null,
       total_deaths: totalDeaths,
       comment,
     })

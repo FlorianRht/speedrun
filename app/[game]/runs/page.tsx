@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatSeconds } from "@/lib/time";
+import { DeleteRunButton } from "@/components/DeleteRunButton";
 
 export default async function RunsPage({ params }: { params: Promise<{ game: string }> }) {
   const { game: gameSlug } = await params;
@@ -25,29 +26,33 @@ export default async function RunsPage({ params }: { params: Promise<{ game: str
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-ink/50 border-b border-black/5">
-              <th className="py-2 pr-4">Date</th>
-              <th className="py-2 pr-4">Catégorie</th>
-              <th className="py-2 pr-4">Temps</th>
-              <th className="py-2 pr-4">Morts</th>
-              <th className="py-2 pr-4">Commentaire</th>
+            <tr className="text-left text-muted border-b border-border">
+              <th className="py-2 pr-4 font-medium">Date</th>
+              <th className="py-2 pr-4 font-medium">Catégorie</th>
+              <th className="py-2 pr-4 font-medium">Temps</th>
+              <th className="py-2 pr-4 font-medium">Morts</th>
+              <th className="py-2 pr-4 font-medium">Commentaire</th>
+              <th className="py-2 font-medium"></th>
             </tr>
           </thead>
           <tbody>
             {(runs ?? []).map((run: any) => (
-              <tr key={run.id} className="border-b border-black/5 last:border-0">
+              <tr key={run.id} className="border-b border-border last:border-0 group">
                 <td className="py-2 pr-4 whitespace-nowrap">
                   {new Date(run.run_date).toLocaleDateString("fr-FR")}
                 </td>
                 <td className="py-2 pr-4">{run.categories?.name ?? "-"}</td>
                 <td className="py-2 pr-4 font-mono">{formatSeconds(run.total_time_seconds)}</td>
                 <td className="py-2 pr-4">{run.total_deaths}</td>
-                <td className="py-2 pr-4 text-ink/60">{run.comment}</td>
+                <td className="py-2 pr-4 text-muted">{run.comment}</td>
+                <td className="py-2">
+                  <DeleteRunButton runId={run.id} gameSlug={gameSlug} />
+                </td>
               </tr>
             ))}
             {(!runs || runs.length === 0) && (
               <tr>
-                <td colSpan={5} className="py-6 text-center text-ink/40">
+                <td colSpan={6} className="py-6 text-center text-muted">
                   Aucune run pour l'instant.
                 </td>
               </tr>

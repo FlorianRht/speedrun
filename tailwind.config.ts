@@ -5,14 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#241F3A",
-        berry: "#8B2E6B",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        border: "var(--border)",
+        berry: "#b044e0",
         sky: "#4AB3C8",
-        cream: "#FBF7F0",
         gold: "#E8B84B",
       },
       fontFamily: {
-        display: ["'Poppins'", "sans-serif"],
+        display: ["var(--font-display)", "sans-serif"],
+        body: ["var(--font-body)", "sans-serif"],
       },
     },
   },

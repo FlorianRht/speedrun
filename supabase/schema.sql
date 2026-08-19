@@ -1,5 +1,5 @@
 -- ============================================================
--- Speedrun Tracker - schéma de base
+-- MyPace - schéma de base
 -- À coller dans Supabase > SQL Editor > New query > Run
 -- ============================================================
 
@@ -10,6 +10,7 @@ create table if not exists games (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,
   name text not null,
+  steam_app_id int,
   created_at timestamptz default now()
 );
 
@@ -40,6 +41,7 @@ create table if not exists runs (
   category_id uuid references categories(id),
   run_date date not null,
   total_time_seconds numeric not null,
+  intro_time_seconds numeric,
   total_deaths int default 0,
   comment text,
   created_at timestamptz default now()
@@ -86,7 +88,7 @@ create policy "users manage own run_splits" on run_splits
 -- Seed : Celeste
 -- ============================================================
 
-insert into games (slug, name) values ('celeste', 'Celeste')
+insert into games (slug, name, steam_app_id) values ('celeste', 'Celeste', 504230)
   on conflict (slug) do nothing;
 
 insert into categories (game_id, name)

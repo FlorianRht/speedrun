@@ -16,7 +16,7 @@ type Point = { date: string; seconds: number };
 export function StatsChart({ data }: { data: Point[] }) {
   if (data.length === 0) {
     return (
-      <div className="text-sm text-ink/50 py-12 text-center">
+      <div className="text-sm text-muted py-12 text-center">
         Pas encore assez de runs pour afficher un graphique.
       </div>
     );
@@ -25,19 +25,26 @@ export function StatsChart({ data }: { data: Point[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#241F3A15" />
-        <XAxis dataKey="date" fontSize={12} tick={{ fill: "#241F3A99" }} />
+        <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+        <XAxis dataKey="date" fontSize={12} className="fill-muted" tick={{ fill: "var(--muted)" }} />
         <YAxis
           fontSize={12}
-          tick={{ fill: "#241F3A99" }}
+          tick={{ fill: "var(--muted)" }}
           tickFormatter={(v) => formatSeconds(v)}
           width={80}
         />
         <Tooltip
           formatter={(value: number) => [formatSeconds(value), "Temps"]}
           labelFormatter={(label) => `Run du ${label}`}
+          contentStyle={{
+            background: "var(--card)",
+            border: "1px solid var(--card-border)",
+            borderRadius: "0.75rem",
+            color: "var(--foreground)",
+          }}
+          labelStyle={{ color: "var(--muted)" }}
         />
-        <Line type="monotone" dataKey="seconds" stroke="#8B2E6B" strokeWidth={2} dot={{ r: 4 }} />
+        <Line type="monotone" dataKey="seconds" stroke="#b044e0" strokeWidth={2} dot={{ r: 4 }} />
       </LineChart>
     </ResponsiveContainer>
   );
