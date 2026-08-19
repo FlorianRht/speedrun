@@ -14,8 +14,7 @@ export function HomeView({ username, games }: { username: string; games: HomeGam
   const totalRuns = games.reduce((sum, g) => sum + g.totalRuns, 0);
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12 min-w-0 overflow-x-hidden space-y-8 md:space-y-10">
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-8 md:py-12 min-w-0 overflow-x-hidden space-y-8 md:space-y-10">
         <section className="space-y-2">
           <p className="text-sm text-muted">Bienvenue</p>
           <h1 className="text-3xl md:text-4xl font-bold font-display">
@@ -55,7 +54,6 @@ export function HomeView({ username, games }: { username: string; games: HomeGam
             </div>
           )}
         </section>
-      </div>
     </div>
   );
 }
