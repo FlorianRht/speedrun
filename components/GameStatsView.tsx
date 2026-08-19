@@ -35,11 +35,18 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        <div
+          className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, var(--background) 0%, color-mix(in srgb, var(--background) 55%, transparent) 55%, transparent 100%)",
+          }}
+          aria-hidden
+        />
         <div className="relative h-full flex items-end p-4 md:p-8">
           <div>
             {subtitle && <p className="text-xs md:text-sm text-muted mb-0.5 md:mb-1">{subtitle}</p>}
-            <h1 className="text-2xl md:text-4xl font-bold font-display">{gameName}</h1>
+            <h1 className="text-2xl md:text-4xl font-bold font-display drop-shadow-sm">{gameName}</h1>
           </div>
         </div>
       </div>
@@ -113,7 +120,7 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
               className="animate-enter animate-fade-in-up rounded-xl p-3 space-y-2"
               style={{
                 ...animDelay(BLOCK_CHAPTERS + 60 + i * CHAPTER_STEP),
-                background: "var(--background)",
+                background: "var(--surface)",
                 border: "1px solid var(--card-border)",
               }}
             >
@@ -266,7 +273,7 @@ function StatCard({
       className="animate-enter animate-fade-in-up rounded-xl p-3 md:p-4"
       style={{
         ...animDelay(cardDelay),
-        background: "var(--background)",
+        background: "var(--surface)",
         border: "1px solid var(--card-border)",
       }}
     >

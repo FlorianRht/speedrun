@@ -84,14 +84,16 @@ function GameCard({ game, featured }: { game: HomeGame; featured?: boolean }) {
 
   return (
     <article
-      className={`card card-mobile overflow-hidden p-0 flex flex-col ${
-        featured ? "md:flex-row md:min-h-[220px]" : ""
+      className={`card card-mobile flex flex-col p-0 ${
+        featured ? "md:flex-row md:items-stretch md:p-4 md:gap-4" : "overflow-hidden"
       }`}
     >
       <Link
         href={`/${game.slug}`}
         className={`group relative overflow-hidden shrink-0 ${
-          featured ? "md:w-[45%] h-40 md:h-auto" : "h-32"
+          featured
+            ? "rounded-xl h-40 md:h-auto md:w-[42%] md:min-h-[188px]"
+            : "h-32 rounded-t-xl md:rounded-t-2xl"
         }`}
       >
         {headerUrl ? (
@@ -106,13 +108,20 @@ function GameCard({ game, featured }: { game: HomeGame; featured?: boolean }) {
             style={{ background: "color-mix(in srgb, var(--berry) 15%, var(--card))" }}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent md:bg-gradient-to-r md:from-background/80 md:via-background/30 md:to-transparent" />
+        <div
+          className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, color-mix(in srgb, var(--card) 96%, transparent) 0%, color-mix(in srgb, var(--card) 50%, transparent) 55%, transparent 100%)",
+          }}
+          aria-hidden
+        />
         <div className="relative h-full flex items-end p-4 md:p-5">
-          <h3 className="font-bold font-display text-xl md:text-2xl">{game.name}</h3>
+          <h3 className="font-bold font-display text-xl md:text-2xl drop-shadow-sm">{game.name}</h3>
         </div>
       </Link>
 
-      <div className={`flex flex-col justify-between gap-4 p-4 md:p-5 ${featured ? "flex-1" : ""}`}>
+      <div className={`flex flex-col justify-between gap-4 p-4 md:p-5 ${featured ? "flex-1 md:px-0 md:py-1" : ""}`}>
         <div className="space-y-2">
           {game.totalRuns > 0 ? (
             <>

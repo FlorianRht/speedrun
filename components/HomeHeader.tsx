@@ -5,14 +5,14 @@ import { ThemeToggle } from "./ThemeToggle";
 export function HomeHeader() {
   return (
     <header
-      className="sticky top-0 z-50 border-b backdrop-blur-md w-full max-w-full overflow-hidden"
+      className="sticky top-0 z-50 border-b backdrop-blur-md w-full"
       style={{
         borderColor: "var(--border)",
         backgroundColor: "color-mix(in srgb, var(--background) 80%, transparent)",
         paddingTop: "env(safe-area-inset-top, 0px)",
       }}
     >
-      <div className="max-w-5xl mx-auto w-full px-4 md:px-6 h-14 flex items-center justify-between gap-3">
+      <div className="w-full px-4 md:px-6 h-14 flex items-center justify-between gap-3">
         <Link href="/" className="font-bold font-display text-lg shrink-0">
           MyPace
         </Link>

@@ -133,7 +133,7 @@ export function AddRunForm({
               <div
                 key={chapter.id}
                 className="rounded-xl p-3 space-y-2.5"
-                style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+                style={{ background: "var(--surface)", border: "1px solid var(--card-border)" }}
               >
                 <p className="text-sm font-medium">{chapter.name}</p>
                 <div className="grid grid-cols-2 gap-2">

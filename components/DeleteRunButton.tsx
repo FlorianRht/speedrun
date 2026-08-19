@@ -30,7 +30,7 @@ export function DeleteRunButton({ runId, gameSlug }: { runId: string; gameSlug: 
           />
           <div
             className="relative rounded-2xl p-5 md:p-6 w-full max-w-sm space-y-4"
-            style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+            style={{ background: "var(--surface)", border: "1px solid var(--card-border)" }}
           >
             <h3 className="text-lg font-bold font-display">Supprimer cette run ?</h3>
             <p className="text-sm text-muted">

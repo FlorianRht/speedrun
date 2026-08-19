@@ -7,7 +7,7 @@ function StatCards({ count = 4 }: { count?: number }) {
         <div
           key={i}
           className="rounded-xl p-3 md:p-4 space-y-2"
-          style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+          style={{ background: "var(--surface)", border: "1px solid var(--card-border)" }}
         >
           <Skeleton className="h-3 w-16" />
           <Skeleton className="h-7 w-24" />
