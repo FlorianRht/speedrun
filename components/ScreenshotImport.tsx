@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Tesseract from "tesseract.js";
+import { Spinner } from "./ui/Spinner";
 
 // L'écran Progress affiche toujours les chapitres dans cet ordre (EN / FR identique côté ordre)
 const CHAPTER_ORDER = [
@@ -79,7 +80,7 @@ export function ScreenshotImport({
   return (
     <div className="space-y-2">
       <div
-        className="card border-dashed !border-2 text-center cursor-pointer hover:border-berry/50 transition"
+        className="card card-mobile border-dashed !border-2 text-center cursor-pointer hover:border-berry/50 transition active:scale-[0.99]"
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         onPaste={handlePaste}
@@ -98,14 +99,17 @@ export function ScreenshotImport({
         />
 
         {loading ? (
-          <div className="py-6 space-y-3">
-            <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "var(--card-border)" }}>
-              <div
-                className="h-full bg-berry rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+          <div className="py-6 space-y-4 flex flex-col items-center">
+            <Spinner size="lg" className="text-berry" />
+            <div className="w-full max-w-xs space-y-2">
+              <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "var(--card-border)" }}>
+                <div
+                  className="h-full bg-berry rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-sm text-muted text-center">Analyse en cours... {progress}%</p>
             </div>
-            <p className="text-sm text-muted">Analyse en cours... {progress}%</p>
           </div>
         ) : (
           <div className="py-6 space-y-2">
@@ -125,7 +129,7 @@ export function ScreenshotImport({
           <summary className="text-muted cursor-pointer hover:text-foreground transition">
             Voir le texte brut détecté (debug)
           </summary>
-          <pre className="mt-2 p-3 rounded-lg text-muted overflow-x-auto whitespace-pre-wrap" style={{ background: "var(--card)" }}>
+          <pre className="mt-2 p-3 rounded-lg text-muted overflow-hidden break-all whitespace-pre-wrap max-w-full" style={{ background: "var(--card)" }}>
             {rawText}
           </pre>
         </details>

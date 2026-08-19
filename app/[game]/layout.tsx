@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { NavBar } from "@/components/NavBar";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { ensureProfile } from "@/lib/profiles";
 
 export default async function GameLayout({
@@ -36,9 +37,10 @@ export default async function GameLayout({
   const multipleGames = (count ?? 0) > 1;
 
   return (
-    <div>
+    <div className="min-h-screen pb-20 md:pb-0 overflow-x-hidden max-w-full">
       <NavBar gameName={game.name} gameSlug={game.slug} gameIconUrl={iconUrl} showGameSelector={multipleGames} />
-      <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-5 md:py-8 min-w-0 overflow-x-hidden">{children}</main>
+      <MobileBottomNav gameSlug={game.slug} />
     </div>
   );
 }

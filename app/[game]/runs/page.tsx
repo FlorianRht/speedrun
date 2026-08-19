@@ -27,31 +27,65 @@ export default async function RunsPage({ params }: { params: Promise<{ game: str
     .order("run_date", { ascending: false });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold font-display">{game.name} - Journal des runs</h1>
+    <div className="space-y-4 md:space-y-6">
+      <h1 className="text-xl md:text-2xl font-bold font-display">{game.name} — Journal des runs</h1>
 
-      <div className="card overflow-x-auto">
-        <table className="w-full text-sm">
+      {/* Mobile / tablet: cards */}
+      <div className="lg:hidden space-y-2">
+        {(runs ?? []).map((run: any) => (
+          <div key={run.id} className="card card-mobile">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="font-mono text-lg font-bold text-berry">
+                    {formatSeconds(run.total_time_seconds)}
+                  </p>
+                  <span className="text-xs text-muted shrink-0">
+                    {new Date(run.run_date).toLocaleDateString("fr-FR")}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted mt-1">
+                  <span>{run.categories?.name ?? "-"}</span>
+                  <span>{run.total_deaths} morts</span>
+                </div>
+                {run.comment && (
+                  <p className="text-sm text-muted mt-2 line-clamp-2">{run.comment}</p>
+                )}
+              </div>
+              <DeleteRunButton runId={run.id} gameSlug={gameSlug} />
+            </div>
+          </div>
+        ))}
+        {(!runs || runs.length === 0) && (
+          <div className="card card-mobile text-center text-muted py-8">
+            Aucune run pour l'instant.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden lg:block card max-w-full overflow-hidden">
+        <table className="w-full table-fixed text-sm">
           <thead>
             <tr className="text-left text-muted border-b border-border">
-              <th className="py-2 pr-4 font-medium">Date</th>
-              <th className="py-2 pr-4 font-medium">Catégorie</th>
-              <th className="py-2 pr-4 font-medium">Temps</th>
-              <th className="py-2 pr-4 font-medium">Morts</th>
-              <th className="py-2 pr-4 font-medium">Commentaire</th>
-              <th className="py-2 font-medium"></th>
+              <th className="py-2 pr-2 font-medium w-[14%]">Date</th>
+              <th className="py-2 pr-2 font-medium w-[16%]">Catégorie</th>
+              <th className="py-2 pr-2 font-medium w-[16%]">Temps</th>
+              <th className="py-2 pr-2 font-medium w-[10%]">Morts</th>
+              <th className="py-2 pr-2 font-medium">Commentaire</th>
+              <th className="py-2 font-medium w-10"></th>
             </tr>
           </thead>
           <tbody>
             {(runs ?? []).map((run: any) => (
               <tr key={run.id} className="border-b border-border last:border-0 group">
-                <td className="py-2 pr-4 whitespace-nowrap">
+                <td className="py-2 pr-2 truncate">
                   {new Date(run.run_date).toLocaleDateString("fr-FR")}
                 </td>
-                <td className="py-2 pr-4">{run.categories?.name ?? "-"}</td>
-                <td className="py-2 pr-4 font-mono">{formatSeconds(run.total_time_seconds)}</td>
-                <td className="py-2 pr-4">{run.total_deaths}</td>
-                <td className="py-2 pr-4 text-muted">{run.comment}</td>
+                <td className="py-2 pr-2 truncate">{run.categories?.name ?? "-"}</td>
+                <td className="py-2 pr-2 font-mono truncate">{formatSeconds(run.total_time_seconds)}</td>
+                <td className="py-2 pr-2">{run.total_deaths}</td>
+                <td className="py-2 pr-2 text-muted truncate">{run.comment}</td>
                 <td className="py-2">
                   <DeleteRunButton runId={run.id} gameSlug={gameSlug} />
                 </td>

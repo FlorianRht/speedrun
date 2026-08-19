@@ -18,10 +18,16 @@ export const metadata: Metadata = {
   description: "Ton rythme, tes runs — suivi de progression speedrun, jeu par jeu.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`dark ${poppins.variable} ${inter.variable}`}>
-      <body className="min-h-screen font-body">{children}</body>
+      <body className="min-h-screen font-body overflow-x-hidden max-w-full">{children}</body>
     </html>
   );
 }

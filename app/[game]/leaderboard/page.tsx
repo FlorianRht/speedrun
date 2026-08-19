@@ -32,7 +32,6 @@ export default async function LeaderboardPage({
     .select("user_id, total_time_seconds, total_deaths, run_date, category_id, categories(name)")
     .eq("game_id", game.id);
 
-  // Best run per user (global PB)
   const bestByUser = new Map<
     string,
     {
@@ -72,22 +71,71 @@ export default async function LeaderboardPage({
     .sort((a, b) => a.time - b.time);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold font-display">{game.name} — Leaderboard</h1>
+        <h1 className="text-xl md:text-2xl font-bold font-display">{game.name} — Leaderboard</h1>
         <p className="text-sm text-muted mt-1">Meilleur temps par joueur</p>
       </div>
 
-      <div className="card overflow-x-auto">
-        <table className="w-full text-sm">
+      {/* Mobile / tablet: cards */}
+      <div className="lg:hidden space-y-2">
+        {leaderboard.map((entry, i) => (
+          <div
+            key={entry.userId}
+            className={`card card-mobile ${entry.isMe ? "ring-1 ring-berry/30" : ""}`}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                  i === 0
+                    ? "bg-berry/20 text-berry"
+                    : i === 1
+                      ? "bg-foreground/10 text-foreground"
+                      : i === 2
+                        ? "bg-foreground/5 text-muted"
+                        : "text-muted"
+                }`}
+              >
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <Link
+                  href={`/${gameSlug}/player/${entry.userId}`}
+                  className="font-medium hover:text-berry transition block truncate"
+                >
+                  {entry.username}
+                  {entry.isMe && <span className="ml-1.5 text-xs text-berry">(toi)</span>}
+                </Link>
+                <p className="font-mono text-lg font-bold text-berry mt-0.5">
+                  {formatSeconds(entry.time)}
+                </p>
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted mt-1">
+                  <span>{entry.deaths} morts</span>
+                  <span>{entry.category}</span>
+                  <span>{new Date(entry.date).toLocaleDateString("fr-FR")}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        {leaderboard.length === 0 && (
+          <div className="card card-mobile text-center text-muted py-8">
+            Aucune run enregistrée pour l'instant.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden lg:block card max-w-full overflow-hidden">
+        <table className="w-full table-fixed text-sm">
           <thead>
             <tr className="text-left text-muted border-b border-border">
-              <th className="py-2 pr-4 font-medium w-12">#</th>
-              <th className="py-2 pr-4 font-medium">Joueur</th>
-              <th className="py-2 pr-4 font-medium">Temps</th>
-              <th className="py-2 pr-4 font-medium">Morts</th>
-              <th className="py-2 pr-4 font-medium">Catégorie</th>
-              <th className="py-2 pr-4 font-medium">Date</th>
+              <th className="py-2 pr-2 font-medium w-10">#</th>
+              <th className="py-2 pr-2 font-medium w-[22%]">Joueur</th>
+              <th className="py-2 pr-2 font-medium w-[18%]">Temps</th>
+              <th className="py-2 pr-2 font-medium w-[12%]">Morts</th>
+              <th className="py-2 pr-2 font-medium w-[22%]">Catégorie</th>
+              <th className="py-2 pr-2 font-medium">Date</th>
             </tr>
           </thead>
           <tbody>
@@ -96,8 +144,8 @@ export default async function LeaderboardPage({
                 key={entry.userId}
                 className={`border-b border-border last:border-0 ${entry.isMe ? "bg-berry/5" : ""}`}
               >
-                <td className="py-3 pr-4 text-muted font-medium">{i + 1}</td>
-                <td className="py-3 pr-4">
+                <td className="py-3 pr-2 text-muted font-medium">{i + 1}</td>
+                <td className="py-3 pr-2 truncate">
                   <Link
                     href={`/${gameSlug}/player/${entry.userId}`}
                     className="font-medium hover:text-berry transition"
@@ -108,12 +156,12 @@ export default async function LeaderboardPage({
                     )}
                   </Link>
                 </td>
-                <td className="py-3 pr-4 font-mono font-medium text-berry">
+                <td className="py-3 pr-2 font-mono font-medium text-berry truncate">
                   {formatSeconds(entry.time)}
                 </td>
-                <td className="py-3 pr-4">{entry.deaths}</td>
-                <td className="py-3 pr-4 text-muted">{entry.category}</td>
-                <td className="py-3 pr-4 text-muted whitespace-nowrap">
+                <td className="py-3 pr-2">{entry.deaths}</td>
+                <td className="py-3 pr-2 text-muted truncate">{entry.category}</td>
+                <td className="py-3 pr-2 text-muted truncate">
                   {new Date(entry.date).toLocaleDateString("fr-FR")}
                 </td>
               </tr>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { addRun } from "@/lib/actions";
 import { ScreenshotImport } from "./ScreenshotImport";
+import { SubmitButton } from "./ui/SubmitButton";
 
 type Category = { id: string; name: string };
 type Chapter = { id: string; name: string; sort_order: number };
@@ -36,7 +37,6 @@ export function AddRunForm({
     }
 
     const newChapterData = { ...chapterData };
-    // Les chapitres sont dans le même ordre que l'écran Progress du jeu
     for (let i = 0; i < chapters.length; i++) {
       const parsed = data.chapters[i];
       if (!parsed) continue;
@@ -50,16 +50,15 @@ export function AddRunForm({
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
+    <div className="w-full max-w-3xl mx-auto space-y-5 md:space-y-8 min-w-0 overflow-x-hidden">
       <div>
-        <h1 className="text-2xl font-bold font-display">Nouvelle run</h1>
+        <h1 className="text-xl md:text-2xl font-bold font-display">Nouvelle run</h1>
         <p className="text-muted text-sm mt-1">
           Entre tes temps comme en jeu (ex: <span className="font-mono">34:16.830</span> ou{" "}
           <span className="font-mono">1:27:51.938</span>)
         </p>
       </div>
 
-      {/* Screenshot import */}
       <ScreenshotImport
         chapterIds={chapters.map((c) => ({ id: c.id, name: c.name }))}
         onParsed={handleParsed}
@@ -71,16 +70,15 @@ export function AddRunForm({
         </p>
       )}
 
-      <form action={addRun} className="space-y-6">
+      <form action={addRun} className="space-y-5 md:space-y-6">
         <input type="hidden" name="gameSlug" value={gameSlug} />
 
-        {/* Main info */}
-        <div className="card space-y-5">
+        <div className="card card-mobile space-y-4 md:space-y-5">
           <h2 className="font-semibold font-display text-sm text-muted uppercase tracking-wide">
             Infos générales
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 items-end">
             <div>
               <label className="label">Date</label>
               <input className="input !py-2.5" type="date" name="runDate" defaultValue={today} required />
@@ -121,8 +119,7 @@ export function AddRunForm({
           </div>
         </div>
 
-        {/* Splits */}
-        <div className="card space-y-4">
+        <div className="card card-mobile space-y-3 md:space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold font-display text-sm text-muted uppercase tracking-wide">
               Splits par chapitre
@@ -130,8 +127,57 @@ export function AddRunForm({
             <span className="text-xs text-muted">(optionnel)</span>
           </div>
 
+          {/* Mobile: stacked cards */}
+          <div className="lg:hidden space-y-2">
+            {chapters.map((chapter) => (
+              <div
+                key={chapter.id}
+                className="rounded-xl p-3 space-y-2.5"
+                style={{ background: "var(--background)", border: "1px solid var(--card-border)" }}
+              >
+                <p className="text-sm font-medium">{chapter.name}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="label text-xs">Temps</label>
+                    <input
+                      className="input font-mono text-sm !py-2 !px-2"
+                      type="text"
+                      name={`chapter_time_${chapter.id}`}
+                      placeholder="mm:ss.cc"
+                      value={chapterData[chapter.id]?.time ?? ""}
+                      onChange={(e) =>
+                        setChapterData((prev) => ({
+                          ...prev,
+                          [chapter.id]: { ...prev[chapter.id], time: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="label text-xs">Morts</label>
+                    <input
+                      className="input text-sm !py-2 !px-2 text-center"
+                      type="number"
+                      min={0}
+                      name={`chapter_deaths_${chapter.id}`}
+                      placeholder="0"
+                      value={chapterData[chapter.id]?.deaths ?? ""}
+                      onChange={(e) =>
+                        setChapterData((prev) => ({
+                          ...prev,
+                          [chapter.id]: { ...prev[chapter.id], deaths: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: table grid */}
           <div
-            className="rounded-xl overflow-hidden border"
+            className="hidden lg:block rounded-xl overflow-hidden border max-w-full"
             style={{ borderColor: "var(--card-border)" }}
           >
             <div
@@ -182,21 +228,16 @@ export function AddRunForm({
           </div>
         </div>
 
-        {/* Submit */}
-        <div
-          className="sticky bottom-0 py-4 -mx-6 px-6"
-          style={{
-            background: "linear-gradient(to top, var(--background) 60%, transparent)",
-          }}
-        >
-          <div className="flex flex-col items-center gap-2">
-            <button type="submit" className="btn-primary text-base px-8 py-3">
-              Enregistrer la run
-            </button>
-            <span className="text-xs text-muted">
-              Les splits sont optionnels, seul le temps total est requis.
-            </span>
-          </div>
+        <div className="pt-2 space-y-2">
+          <SubmitButton
+            pendingLabel="Enregistrement..."
+            className="w-full md:w-auto md:mx-auto md:flex text-base px-8 py-3"
+          >
+            Enregistrer la run
+          </SubmitButton>
+          <p className="text-xs text-muted text-center pb-1">
+            Les splits sont optionnels, seul le temps total est requis.
+          </p>
         </div>
       </form>
     </div>

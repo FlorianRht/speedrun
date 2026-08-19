@@ -20,10 +20,16 @@
   --card-border: rgba(255, 255, 255, 0.1);
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   transition: background-color 0.2s, color 0.2s;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .card {
@@ -32,8 +38,15 @@ body {
   border: 1px solid var(--card-border);
 }
 
+@media (max-width: 767px) {
+  .card-mobile {
+    @apply rounded-xl p-4;
+  }
+}
+
 .btn-primary {
   @apply inline-flex items-center justify-center rounded-xl bg-berry text-white font-medium px-5 py-2.5 hover:bg-berry/80 transition disabled:opacity-50;
+  min-height: 44px;
 }
 
 .btn-secondary {
@@ -53,6 +66,7 @@ body {
   border: 1px solid var(--card-border);
   color: var(--foreground);
   color-scheme: dark;
+  min-height: 44px;
 }
 
 select.input,
