@@ -9,6 +9,7 @@ import {
   validateUsername,
 } from "@/lib/profiles";
 import { authErrorMessage } from "@/lib/auth-errors";
+import { getSiteOrigin } from "@/lib/site-url";
 import { redirect } from "next/navigation";
 
 export async function signUpWithEmail(formData: FormData) {
@@ -26,10 +27,15 @@ export async function signUpWithEmail(formData: FormData) {
     redirect(`/login?error=${encodeURIComponent("Ce pseudo est déjà pris.")}`);
   }
 
+  const siteOrigin = await getSiteOrigin();
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { username } },
+    options: {
+      data: { username },
+      emailRedirectTo: `${siteOrigin}/auth/callback?next=/celeste`,
+    },
   });
 
   if (error) {
