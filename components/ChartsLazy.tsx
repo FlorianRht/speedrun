@@ -7,7 +7,7 @@ export const StatsChartLazy = dynamic(
   () => import("@/components/StatsChart").then((m) => m.StatsChart),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-56 w-full rounded-xl" />,
+    loading: () => <Skeleton className="h-64 w-full rounded-xl" />,
   }
 );
 

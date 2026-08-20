@@ -106,8 +106,10 @@ export function GameStatsView({ gameName, headerUrl, stats, subtitle }: Props) {
       </div>
 
       <div className="animate-enter animate-fade-in-up card card-mobile" style={animDelay(BLOCK_CHART)}>
-        <h2 className="font-semibold font-display mb-3 md:mb-4 text-sm md:text-base">Évolution du temps final</h2>
-        <StatsChartLazy data={stats.chartData} />
+        <h2 className="font-semibold font-display mb-3 md:mb-4 text-sm md:text-base">
+          Évolution des temps
+        </h2>
+        <StatsChartLazy series={stats.evolutionSeries} data={stats.chartData} />
       </div>
 
       <div className="animate-enter animate-fade-in-up card card-mobile" style={animDelay(BLOCK_CHAPTERS)}>

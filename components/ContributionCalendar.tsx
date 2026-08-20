@@ -6,11 +6,12 @@ type Props = {
   data: Record<string, number>;
 };
 
-const GAP = 2;
-const LEFT_GUTTER = 28;
-const TOP_GUTTER = 20;
+const GAP = 3;
+const LEFT_GUTTER = 18;
+const TOP_GUTTER = 18;
 const WEEK_LABELS = ["", "L", "", "M", "", "V", ""];
 const MONTH_LABELS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+const MOBILE_WEEKS = 16; // ~4 mois
 
 const PANEL_COLORS: Record<number, string> = {
   0: "var(--card-border, #2a2a3a)",
@@ -67,7 +68,7 @@ function colorForCount(count: number): string {
 
 export function ContributionCalendar({ data }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [rectSize, setRectSize] = useState(10);
+  const [width, setWidth] = useState(0);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -75,29 +76,28 @@ export function ContributionCalendar({ data }: Props) {
     return d;
   }, []);
 
+  const isMobile = width > 0 && width < 640;
+
   const startDate = useMemo(() => {
+    if (isMobile) {
+      const d = addDays(today, -(MOBILE_WEEKS - 1) * 7);
+      return startOfWeek(d);
+    }
     const d = new Date(today);
     d.setFullYear(d.getFullYear() - 1);
     return startOfWeek(d);
-  }, [today]);
+  }, [today, isMobile]);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const update = () => {
-      const width = el.clientWidth;
-      const weeks = Math.ceil((today.getTime() - startDate.getTime()) / (7 * 86400000)) + 1;
-      const available = Math.max(0, width - LEFT_GUTTER);
-      const size = Math.floor((available - weeks * GAP) / weeks);
-      setRectSize(Math.max(3, Math.min(14, size)));
-    };
-
+    const update = () => setWidth(el.clientWidth);
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [startDate, today]);
+  }, []);
 
   const weeks = useMemo(() => {
     const result: { date: Date; count: number }[][] = [];
@@ -117,15 +117,24 @@ export function ContributionCalendar({ data }: Props) {
     return result;
   }, [data, startDate, today]);
 
-  const svgWidth = LEFT_GUTTER + weeks.length * rectSize + (weeks.length - 1) * GAP;
+  const rectSize = useMemo(() => {
+    if (width <= 0 || weeks.length === 0) return isMobile ? 14 : 10;
+    const available = Math.max(0, width - LEFT_GUTTER);
+    const size = Math.floor((available - (weeks.length - 1) * GAP) / weeks.length);
+    if (isMobile) return Math.max(12, Math.min(16, size));
+    return Math.max(8, Math.min(14, size));
+  }, [width, weeks.length, isMobile]);
+
+  const svgWidth = LEFT_GUTTER + weeks.length * rectSize + Math.max(0, weeks.length - 1) * GAP;
   const svgHeight = TOP_GUTTER + 7 * rectSize + 6 * GAP;
+  const labelSize = isMobile ? 11 : 10;
 
   return (
-    <div ref={containerRef} className="w-full max-w-full overflow-hidden space-y-3">
+    <div ref={containerRef} className="w-full max-w-full space-y-3">
       <svg
-        width="100%"
-        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-        className="text-muted"
+        width={svgWidth}
+        height={svgHeight}
+        className="text-muted max-w-full"
         role="img"
         aria-label="Calendrier d'activité des runs"
       >
@@ -134,8 +143,8 @@ export function ContributionCalendar({ data }: Props) {
             <text
               key={label + row}
               x={0}
-              y={TOP_GUTTER + row * (rectSize + GAP) + rectSize * 0.75}
-              fontSize={10}
+              y={TOP_GUTTER + row * (rectSize + GAP) + rectSize * 0.78}
+              fontSize={labelSize}
               fill="currentColor"
             >
               {label}
@@ -155,7 +164,7 @@ export function ContributionCalendar({ data }: Props) {
                 <text
                   x={LEFT_GUTTER + col * (rectSize + GAP)}
                   y={12}
-                  fontSize={10}
+                  fontSize={labelSize}
                   fill="currentColor"
                 >
                   {MONTH_LABELS[firstDay.getMonth()]}
@@ -172,7 +181,7 @@ export function ContributionCalendar({ data }: Props) {
                     y={y}
                     width={rectSize}
                     height={rectSize}
-                    rx={2}
+                    rx={3}
                     fill={colorForCount(count)}
                   >
                     <title>{title}</title>
@@ -184,27 +193,30 @@ export function ContributionCalendar({ data }: Props) {
         })}
       </svg>
 
-      <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-xs text-muted">
-        {LEGEND_LEVELS.map((level) => (
-          <div key={level.threshold} className="flex items-center gap-1">
-            <span className="tabular-nums">
-              {level.threshold === 0 ? "0" : `${level.threshold}+`}
-            </span>
-            <span
-              className="inline-block rounded-sm shrink-0"
-              style={{
-                width: rectSize,
-                height: rectSize,
-                backgroundColor: level.color,
-              }}
-              title={
-                level.threshold === 0
-                  ? "Aucune run"
-                  : `${level.threshold}+ run${level.threshold > 1 ? "s" : ""}`
-              }
-            />
-          </div>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
+        <span>{isMobile ? "4 derniers mois" : "12 derniers mois"}</span>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          {LEGEND_LEVELS.map((level) => (
+            <div key={level.threshold} className="flex items-center gap-1">
+              <span className="tabular-nums">
+                {level.threshold === 0 ? "0" : `${level.threshold}+`}
+              </span>
+              <span
+                className="inline-block rounded-sm shrink-0"
+                style={{
+                  width: Math.max(10, Math.min(rectSize, 12)),
+                  height: Math.max(10, Math.min(rectSize, 12)),
+                  backgroundColor: level.color,
+                }}
+                title={
+                  level.threshold === 0
+                    ? "Aucune run"
+                    : `${level.threshold}+ run${level.threshold > 1 ? "s" : ""}`
+                }
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

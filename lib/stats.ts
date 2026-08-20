@@ -17,8 +17,15 @@ type Split = {
   deaths: number | null;
 };
 
+export type EvolutionSeries = {
+  id: string;
+  label: string;
+  points: { date: string; seconds: number }[];
+};
+
 export type GameStats = {
   chartData: { date: string; seconds: number }[];
+  evolutionSeries: EvolutionSeries[];
   bestOverall: number | null;
   worstOverall: number | null;
   averageOverall: number | null;
@@ -53,6 +60,29 @@ export function computeGameStats(
     date: new Date(r.run_date).toLocaleDateString("fr-FR"),
     seconds: Number(r.total_time_seconds),
   }));
+
+  const evolutionSeries: EvolutionSeries[] = [
+    { id: "total", label: "Temps total", points: chartData },
+  ];
+
+  for (const chapter of chapters) {
+    const points = runs
+      .map((run) => {
+        const split = splits.find(
+          (s) => s.run_id === run.id && s.chapter_id === chapter.id && s.time_seconds !== null
+        );
+        if (!split || split.time_seconds === null) return null;
+        return {
+          date: new Date(run.run_date).toLocaleDateString("fr-FR"),
+          seconds: Number(split.time_seconds),
+        };
+      })
+      .filter((p): p is { date: string; seconds: number } => p !== null);
+
+    if (points.length > 0) {
+      evolutionSeries.push({ id: chapter.id, label: chapter.name, points });
+    }
+  }
 
   const times = runs.map((r) => Number(r.total_time_seconds));
   const bestOverall = times.length ? Math.min(...times) : null;
@@ -171,6 +201,7 @@ export function computeGameStats(
 
   return {
     chartData,
+    evolutionSeries,
     bestOverall,
     worstOverall,
     averageOverall,

@@ -48,15 +48,16 @@ body {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-xl bg-berry text-white font-medium px-5 py-2.5 hover:bg-berry/80 transition disabled:opacity-50;
+  @apply inline-flex items-center justify-center rounded-xl bg-berry text-white font-medium px-5 py-2.5 hover:bg-berry/80 transition disabled:opacity-50 touch-manipulation;
   min-height: 44px;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-xl font-medium px-5 py-2.5 transition;
+  @apply inline-flex items-center justify-center rounded-xl font-medium px-5 py-2.5 transition touch-manipulation;
   background: var(--card);
   border: 1px solid var(--card-border);
   color: var(--foreground);
+  min-height: 44px;
 }
 
 .btn-secondary:hover {
