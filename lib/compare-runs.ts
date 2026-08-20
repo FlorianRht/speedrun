@@ -130,18 +130,19 @@ export function compareRuns(runA: RunDetail, runB: RunDetail): RunComparison {
       timeB,
       deathsA,
       deathsB,
-      timeDelta: timeA !== null && timeB !== null ? timeB - timeA : null,
-      deathsDelta: deathsA !== null && deathsB !== null ? deathsB - deathsA : null,
+      // Delta = A − B : négatif = A meilleur (plus rapide / moins de morts)
+      timeDelta: timeA !== null && timeB !== null ? timeA - timeB : null,
+      deathsDelta: deathsA !== null && deathsB !== null ? deathsA - deathsB : null,
     };
   });
 
   return {
     runA,
     runB,
-    totalTimeDelta: runB.total_time_seconds - runA.total_time_seconds,
+    totalTimeDelta: runA.total_time_seconds - runB.total_time_seconds,
     totalDeathsDelta:
       runA.total_deaths !== null && runB.total_deaths !== null
-        ? runB.total_deaths - runA.total_deaths
+        ? runA.total_deaths - runB.total_deaths
         : null,
     segments,
   };
