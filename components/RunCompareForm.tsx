@@ -8,7 +8,7 @@ import { formatSeconds } from "@/lib/time";
 
 function runLabel(run: CompareRunOption): string {
   const date = new Date(run.run_date).toLocaleDateString("fr-FR");
-  return `${formatSeconds(run.total_time_seconds)} — ${date}${run.category_name ? ` (${run.category_name})` : ""}`;
+  return `${formatSeconds(run.total_time_seconds)} — ${date}`;
 }
 
 type Props = {

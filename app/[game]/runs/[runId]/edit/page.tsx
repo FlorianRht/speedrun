@@ -22,12 +22,6 @@ export default async function EditRunPage({
   const run = await fetchOwnedRun(supabase, runId, game.id, user.id);
   if (!run) notFound();
 
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name")
-    .eq("game_id", game.id)
-    .order("name");
-
   const { data: chapters } = await supabase
     .from("chapters")
     .select("id, name, sort_order")
@@ -38,14 +32,12 @@ export default async function EditRunPage({
     <AddRunForm
       gameSlug={game.slug}
       gameName={game.name}
-      categories={categories ?? []}
       chapters={chapters ?? []}
       initial={{
         id: run.id,
         run_date: run.run_date,
         total_time_seconds: run.total_time_seconds,
         comment: run.comment,
-        category_id: run.category_id,
         splits: run.splits,
       }}
     />

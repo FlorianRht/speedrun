@@ -13,7 +13,6 @@ export type RunDetail = {
   run_date: string;
   total_time_seconds: number;
   total_deaths: number | null;
-  category_name: string | null;
   comment: string | null;
   segments: RunSegment[];
 };
@@ -23,7 +22,6 @@ export type CompareRunOption = {
   run_date: string;
   total_time_seconds: number;
   total_deaths: number | null;
-  category_name: string | null;
 };
 
 export type ComparePlayerOption = {
@@ -42,14 +40,7 @@ type RunRow = {
   total_deaths: number | null;
   intro_time_seconds?: number | null;
   comment: string | null;
-  categories: { name: string } | { name: string }[] | null;
 };
-
-function categoryName(categories: RunRow["categories"]): string | null {
-  if (!categories) return null;
-  if (Array.isArray(categories)) return categories[0]?.name ?? null;
-  return categories.name;
-}
 
 export function buildRunDetail(
   run: RunRow,
@@ -89,7 +80,6 @@ export function buildRunDetail(
     run_date: run.run_date,
     total_time_seconds: Number(run.total_time_seconds),
     total_deaths: run.total_deaths,
-    category_name: categoryName(run.categories),
     comment: run.comment,
     segments,
   };

@@ -65,7 +65,6 @@ function RunSummary({
         })}
       </p>
       <div className="flex flex-wrap gap-x-3 text-xs text-muted">
-        {run.category_name && <span>{run.category_name}</span>}
         {run.total_deaths !== null && <span>{run.total_deaths} morts</span>}
       </div>
       {run.comment && <p className="text-xs text-muted line-clamp-2 pt-1">{run.comment}</p>}

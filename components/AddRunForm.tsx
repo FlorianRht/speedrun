@@ -7,7 +7,6 @@ import { formatSeconds } from "@/lib/time";
 import { ScreenshotImport } from "./ScreenshotImport";
 import { SubmitButton } from "./ui/SubmitButton";
 
-type Category = { id: string; name: string };
 type Chapter = { id: string; name: string; sort_order: number };
 
 export type RunFormInitial = {
@@ -15,20 +14,17 @@ export type RunFormInitial = {
   run_date: string;
   total_time_seconds: number;
   comment: string | null;
-  category_id: string | null;
   splits: { chapter_id: string; time_seconds: number | null; deaths: number | null }[];
 };
 
 export function AddRunForm({
   gameSlug,
   gameName,
-  categories,
   chapters,
   initial,
 }: {
   gameSlug: string;
   gameName: string;
-  categories: Category[];
   chapters: Chapter[];
   initial?: RunFormInitial;
 }) {
@@ -122,7 +118,7 @@ export function AddRunForm({
             Infos générales
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 items-end">
             <div>
               <label className="label">Date</label>
               <input
@@ -132,22 +128,6 @@ export function AddRunForm({
                 defaultValue={initial?.run_date ?? today}
                 required
               />
-            </div>
-            <div>
-              <label className="label">Catégorie</label>
-              <select
-                className="input !py-2.5"
-                name="categoryId"
-                defaultValue={initial?.category_id ?? ""}
-                required
-              >
-                <option value="">-- Choisir --</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
             </div>
             <div>
               <label className="label">Temps total</label>

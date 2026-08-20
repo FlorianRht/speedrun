@@ -21,15 +21,9 @@ export default async function LeaderboardPage({
   const game = await fetchGameBySlug(supabase, gameSlug);
   if (!game) notFound();
 
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name")
-    .eq("game_id", game.id)
-    .order("name");
-
   const { data: runs } = await supabase
     .from("runs")
-    .select("id, user_id, total_time_seconds, total_deaths, run_date, category_id, categories(name)")
+    .select("id, user_id, total_time_seconds, total_deaths, run_date")
     .eq("game_id", game.id);
 
   const bestByUser = new Map<
@@ -39,7 +33,6 @@ export default async function LeaderboardPage({
       time: number;
       deaths: number;
       date: string;
-      category: string;
     }
   >();
 
@@ -52,7 +45,6 @@ export default async function LeaderboardPage({
         time,
         deaths: run.total_deaths ?? 0,
         date: run.run_date,
-        category: (run as any).categories?.name ?? "-",
       });
     }
   }
@@ -79,7 +71,6 @@ export default async function LeaderboardPage({
         <p className="text-sm text-muted mt-1">Meilleur temps par joueur</p>
       </div>
 
-      {/* Mobile / tablet: cards */}
       <div className="lg:hidden space-y-2">
         {leaderboard.map((entry, i) => (
           <div
@@ -113,7 +104,6 @@ export default async function LeaderboardPage({
                 </p>
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted mt-1">
                   <span>{entry.deaths} morts</span>
-                  <span>{entry.category}</span>
                   <span>{new Date(entry.date).toLocaleDateString("fr-FR")}</span>
                 </div>
                 {!entry.isMe && (
@@ -130,21 +120,19 @@ export default async function LeaderboardPage({
         ))}
         {leaderboard.length === 0 && (
           <div className="card card-mobile text-center text-muted py-8">
-            Aucune run enregistrée pour l'instant.
+            Aucune run enregistrée pour l&apos;instant.
           </div>
         )}
       </div>
 
-      {/* Desktop: table */}
       <div className="hidden lg:block card max-w-full overflow-hidden">
         <table className="w-full table-fixed text-sm">
           <thead>
             <tr className="text-left text-muted border-b border-border">
               <th className="py-2 pr-2 font-medium w-10">#</th>
-              <th className="py-2 pr-2 font-medium w-[22%]">Joueur</th>
-              <th className="py-2 pr-2 font-medium w-[18%]">Temps</th>
-              <th className="py-2 pr-2 font-medium w-[12%]">Morts</th>
-              <th className="py-2 pr-2 font-medium w-[22%]">Catégorie</th>
+              <th className="py-2 pr-2 font-medium w-[28%]">Joueur</th>
+              <th className="py-2 pr-2 font-medium w-[22%]">Temps</th>
+              <th className="py-2 pr-2 font-medium w-[14%]">Morts</th>
               <th className="py-2 pr-2 font-medium w-[18%]">Date</th>
               <th className="py-2 pr-2 font-medium w-[14%]"></th>
             </tr>
@@ -171,7 +159,6 @@ export default async function LeaderboardPage({
                   {formatSeconds(entry.time)}
                 </td>
                 <td className="py-3 pr-2">{entry.deaths}</td>
-                <td className="py-3 pr-2 text-muted truncate">{entry.category}</td>
                 <td className="py-3 pr-2 text-muted truncate">
                   {new Date(entry.date).toLocaleDateString("fr-FR")}
                 </td>
@@ -189,21 +176,14 @@ export default async function LeaderboardPage({
             ))}
             {leaderboard.length === 0 && (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-muted">
-                  Aucune run enregistrée pour l'instant.
+                <td colSpan={6} className="py-8 text-center text-muted">
+                  Aucune run enregistrée pour l&apos;instant.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {categories && categories.length > 0 && (
-        <p className="text-xs text-muted">
-          Catégories disponibles : {categories.map((c) => c.name).join(", ")}. Le leaderboard
-          affiche le PB global de chaque joueur.
-        </p>
-      )}
     </div>
   );
 }

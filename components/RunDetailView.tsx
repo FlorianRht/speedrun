@@ -81,7 +81,6 @@ export function RunDetailView({
                 year: "numeric",
               })}
             </p>
-            <p>{run.category_name ?? "Sans catégorie"}</p>
             <p>{run.total_deaths ?? 0} morts</p>
           </div>
         </div>

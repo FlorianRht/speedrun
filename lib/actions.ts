@@ -104,7 +104,6 @@ export async function addRun(formData: FormData) {
     .single();
   if (!game) throw new Error("Jeu introuvable");
 
-  const categoryId = String(formData.get("categoryId"));
   const runDate = String(formData.get("runDate"));
   const totalTimeText = String(formData.get("totalTime"));
   const comment = String(formData.get("comment") ?? "");
@@ -146,7 +145,7 @@ export async function addRun(formData: FormData) {
     .insert({
       user_id: user.id,
       game_id: game.id,
-      category_id: categoryId || null,
+      category_id: null,
       run_date: runDate,
       total_time_seconds: totalTimeSeconds,
       intro_time_seconds: introTime && introTime > 0 ? introTime : null,
@@ -198,7 +197,6 @@ export async function updateRun(formData: FormData) {
     .single();
   if (!existing) throw new Error("Run introuvable");
 
-  const categoryId = String(formData.get("categoryId"));
   const runDate = String(formData.get("runDate"));
   const totalTimeText = String(formData.get("totalTime"));
   const comment = String(formData.get("comment") ?? "");
@@ -236,7 +234,7 @@ export async function updateRun(formData: FormData) {
   const { error: runError } = await supabase
     .from("runs")
     .update({
-      category_id: categoryId || null,
+      category_id: null,
       run_date: runDate,
       total_time_seconds: totalTimeSeconds,
       intro_time_seconds: introTime && introTime > 0 ? introTime : null,

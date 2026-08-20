@@ -36,7 +36,6 @@ export function PlayerRunsCompare({
                   month: "long",
                   year: "numeric",
                 })}
-                {run.category_name ? ` · ${run.category_name}` : ""}
                 {run.total_deaths !== null ? ` · ${run.total_deaths} morts` : ""}
               </p>
             </div>

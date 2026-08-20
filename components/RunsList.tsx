@@ -11,7 +11,6 @@ export type RunListItem = {
   total_time_seconds: number;
   total_deaths: number | null;
   comment: string | null;
-  category_name: string | null;
 };
 
 export function RunsList({
@@ -111,7 +110,6 @@ export function RunsList({
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted mt-1">
-                      <span>{run.category_name ?? "-"}</span>
                       <span>{run.total_deaths} morts</span>
                     </div>
                     {run.comment && (
@@ -136,10 +134,9 @@ export function RunsList({
           <thead>
             <tr className="text-left text-muted border-b border-border">
               {runs.length > 0 && <th className="py-2 pr-2 font-medium w-10"></th>}
-              <th className="py-2 pr-2 font-medium w-[14%]">Date</th>
-              <th className="py-2 pr-2 font-medium w-[16%]">Catégorie</th>
-              <th className="py-2 pr-2 font-medium w-[16%]">Temps</th>
-              <th className="py-2 pr-2 font-medium w-[10%]">Morts</th>
+              <th className="py-2 pr-2 font-medium w-[16%]">Date</th>
+              <th className="py-2 pr-2 font-medium w-[18%]">Temps</th>
+              <th className="py-2 pr-2 font-medium w-[12%]">Morts</th>
               <th className="py-2 pr-2 font-medium">Commentaire</th>
               <th className="py-2 font-medium w-24"></th>
             </tr>
@@ -171,7 +168,6 @@ export function RunsList({
                       {new Date(run.run_date).toLocaleDateString("fr-FR")}
                     </Link>
                   </td>
-                  <td className="py-2 pr-2 truncate">{run.category_name ?? "-"}</td>
                   <td className="py-2 pr-2 font-mono truncate">
                     <Link
                       href={`/${gameSlug}/runs/${run.id}`}
@@ -202,7 +198,7 @@ export function RunsList({
             })}
             {runs.length === 0 && (
               <tr>
-                <td colSpan={runs.length > 0 ? 7 : 6} className="py-6 text-center text-muted">
+                <td colSpan={runs.length > 0 ? 6 : 5} className="py-6 text-center text-muted">
                   Aucune run pour l&apos;instant.
                 </td>
               </tr>

@@ -12,12 +12,6 @@ export default async function AddRunPage({ params }: { params: Promise<{ game: s
     .single();
   if (!game) return null;
 
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name")
-    .eq("game_id", game.id)
-    .order("name");
-
   const { data: chapters } = await supabase
     .from("chapters")
     .select("id, name, sort_order")
@@ -28,7 +22,6 @@ export default async function AddRunPage({ params }: { params: Promise<{ game: s
     <AddRunForm
       gameSlug={game.slug}
       gameName={game.name}
-      categories={categories ?? []}
       chapters={chapters ?? []}
     />
   );

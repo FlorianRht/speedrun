@@ -49,7 +49,7 @@ export async function fetchRunDetail(
   const { data: run } = await supabase
     .from("runs")
     .select(
-      "id, user_id, run_date, total_time_seconds, total_deaths, intro_time_seconds, comment, categories(name)"
+      "id, user_id, run_date, total_time_seconds, total_deaths, intro_time_seconds, comment"
     )
     .eq("id", runId)
     .eq("game_id", gameId)
@@ -80,21 +80,14 @@ type RawRunRow = {
   run_date: string;
   total_time_seconds: number;
   total_deaths: number | null;
-  categories: { name: string } | { name: string }[] | null;
 };
 
 function toCompareRunOption(run: RawRunRow): CompareRunOption {
-  const categories = run.categories;
-  const category_name = Array.isArray(categories)
-    ? categories[0]?.name ?? null
-    : categories?.name ?? null;
-
   return {
     id: run.id,
     run_date: run.run_date,
     total_time_seconds: Number(run.total_time_seconds),
     total_deaths: run.total_deaths,
-    category_name,
   };
 }
 
@@ -105,7 +98,7 @@ export async function fetchComparePickerData(
 ) {
   const { data: runs } = await supabase
     .from("runs")
-    .select("id, user_id, run_date, total_time_seconds, total_deaths, categories(name)")
+    .select("id, user_id, run_date, total_time_seconds, total_deaths")
     .eq("game_id", gameId)
     .order("run_date", { ascending: false });
 
@@ -142,7 +135,7 @@ export async function fetchUserRunsList(
 ): Promise<CompareRunOption[]> {
   const { data: runs } = await supabase
     .from("runs")
-    .select("id, user_id, run_date, total_time_seconds, total_deaths, categories(name)")
+    .select("id, user_id, run_date, total_time_seconds, total_deaths")
     .eq("game_id", gameId)
     .eq("user_id", userId)
     .order("run_date", { ascending: false });
@@ -157,8 +150,6 @@ export type EditableRun = {
   total_deaths: number | null;
   intro_time_seconds: number | null;
   comment: string | null;
-  category_id: string | null;
-  category_name: string | null;
   splits: { chapter_id: string; time_seconds: number | null; deaths: number | null }[];
 };
 
@@ -171,7 +162,7 @@ export async function fetchOwnedRun(
   const { data: run } = await supabase
     .from("runs")
     .select(
-      "id, run_date, total_time_seconds, total_deaths, intro_time_seconds, comment, category_id, categories(name)"
+      "id, run_date, total_time_seconds, total_deaths, intro_time_seconds, comment"
     )
     .eq("id", runId)
     .eq("game_id", gameId)
@@ -185,11 +176,6 @@ export async function fetchOwnedRun(
     .select("chapter_id, time_seconds, deaths")
     .eq("run_id", runId);
 
-  const categories = run.categories as { name: string } | { name: string }[] | null;
-  const category_name = Array.isArray(categories)
-    ? categories[0]?.name ?? null
-    : categories?.name ?? null;
-
   return {
     id: run.id,
     run_date: run.run_date,
@@ -197,8 +183,6 @@ export async function fetchOwnedRun(
     total_deaths: run.total_deaths,
     intro_time_seconds: run.intro_time_seconds != null ? Number(run.intro_time_seconds) : null,
     comment: run.comment,
-    category_id: run.category_id,
-    category_name,
     splits: (splits ?? []).map((s) => ({
       chapter_id: s.chapter_id,
       time_seconds: s.time_seconds != null ? Number(s.time_seconds) : null,
