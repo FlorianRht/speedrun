@@ -171,3 +171,95 @@ export async function addRun(formData: FormData) {
 
   redirect(`/${gameSlug}/runs`);
 }
+
+export async function updateRun(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const runId = String(formData.get("runId"));
+  const gameSlug = String(formData.get("gameSlug"));
+
+  const { data: game } = await supabase
+    .from("games")
+    .select("id")
+    .eq("slug", gameSlug)
+    .single();
+  if (!game) throw new Error("Jeu introuvable");
+
+  const { data: existing } = await supabase
+    .from("runs")
+    .select("id")
+    .eq("id", runId)
+    .eq("user_id", user.id)
+    .eq("game_id", game.id)
+    .single();
+  if (!existing) throw new Error("Run introuvable");
+
+  const categoryId = String(formData.get("categoryId"));
+  const runDate = String(formData.get("runDate"));
+  const totalTimeText = String(formData.get("totalTime"));
+  const comment = String(formData.get("comment") ?? "");
+
+  const totalTimeSeconds = parseTimeToSeconds(totalTimeText);
+  if (totalTimeSeconds === null) {
+    throw new Error("Format de temps invalide (attendu: mm:ss.SSS ou h:mm:ss.SSS)");
+  }
+
+  const { data: chapters } = await supabase
+    .from("chapters")
+    .select("id, name, sort_order")
+    .eq("game_id", game.id)
+    .order("sort_order");
+
+  let totalDeaths = 0;
+  const splitsPayload: { chapter_id: string; time_seconds: number | null; deaths: number }[] = [];
+
+  for (const chapter of chapters ?? []) {
+    const timeText = String(formData.get(`chapter_time_${chapter.id}`) ?? "");
+    const deathsRaw = formData.get(`chapter_deaths_${chapter.id}`);
+    const deaths = deathsRaw ? Number(deathsRaw) : 0;
+    totalDeaths += Number.isNaN(deaths) ? 0 : deaths;
+
+    splitsPayload.push({
+      chapter_id: chapter.id,
+      time_seconds: timeText ? parseTimeToSeconds(timeText) : null,
+      deaths: Number.isNaN(deaths) ? 0 : deaths,
+    });
+  }
+
+  const sumSplits = splitsPayload.reduce((sum, s) => sum + (s.time_seconds ?? 0), 0);
+  const introTime = sumSplits > 0 ? totalTimeSeconds - sumSplits : null;
+
+  const { error: runError } = await supabase
+    .from("runs")
+    .update({
+      category_id: categoryId || null,
+      run_date: runDate,
+      total_time_seconds: totalTimeSeconds,
+      intro_time_seconds: introTime && introTime > 0 ? introTime : null,
+      total_deaths: totalDeaths,
+      comment,
+    })
+    .eq("id", runId)
+    .eq("user_id", user.id);
+
+  if (runError) {
+    throw new Error(runError.message);
+  }
+
+  await supabase.from("run_splits").delete().eq("run_id", runId);
+
+  if (splitsPayload.length > 0) {
+    const { error: splitsError } = await supabase
+      .from("run_splits")
+      .insert(splitsPayload.map((s) => ({ ...s, run_id: runId })));
+    if (splitsError) {
+      throw new Error(splitsError.message);
+    }
+  }
+
+  redirect(`/${gameSlug}/runs/${runId}`);
+}

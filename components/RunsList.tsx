@@ -101,21 +101,23 @@ export function RunsList({
                   />
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-mono text-lg font-bold text-berry">
-                      {formatSeconds(run.total_time_seconds)}
-                    </p>
-                    <span className="text-xs text-muted shrink-0">
-                      {new Date(run.run_date).toLocaleDateString("fr-FR")}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted mt-1">
-                    <span>{run.category_name ?? "-"}</span>
-                    <span>{run.total_deaths} morts</span>
-                  </div>
-                  {run.comment && (
-                    <p className="text-sm text-muted mt-2 line-clamp-2">{run.comment}</p>
-                  )}
+                  <Link href={`/${gameSlug}/runs/${run.id}`} className="block group/link">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="font-mono text-lg font-bold text-berry group-hover/link:underline">
+                        {formatSeconds(run.total_time_seconds)}
+                      </p>
+                      <span className="text-xs text-muted shrink-0">
+                        {new Date(run.run_date).toLocaleDateString("fr-FR")}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted mt-1">
+                      <span>{run.category_name ?? "-"}</span>
+                      <span>{run.total_deaths} morts</span>
+                    </div>
+                    {run.comment && (
+                      <p className="text-sm text-muted mt-2 line-clamp-2">{run.comment}</p>
+                    )}
+                  </Link>
                 </div>
                 <DeleteRunButton runId={run.id} gameSlug={gameSlug} />
               </div>
@@ -139,7 +141,7 @@ export function RunsList({
               <th className="py-2 pr-2 font-medium w-[16%]">Temps</th>
               <th className="py-2 pr-2 font-medium w-[10%]">Morts</th>
               <th className="py-2 pr-2 font-medium">Commentaire</th>
-              <th className="py-2 font-medium w-10"></th>
+              <th className="py-2 font-medium w-24"></th>
             </tr>
           </thead>
           <tbody>
@@ -162,16 +164,38 @@ export function RunsList({
                     </td>
                   )}
                   <td className="py-2 pr-2 truncate">
-                    {new Date(run.run_date).toLocaleDateString("fr-FR")}
+                    <Link
+                      href={`/${gameSlug}/runs/${run.id}`}
+                      className="hover:text-berry transition"
+                    >
+                      {new Date(run.run_date).toLocaleDateString("fr-FR")}
+                    </Link>
                   </td>
                   <td className="py-2 pr-2 truncate">{run.category_name ?? "-"}</td>
                   <td className="py-2 pr-2 font-mono truncate">
-                    {formatSeconds(run.total_time_seconds)}
+                    <Link
+                      href={`/${gameSlug}/runs/${run.id}`}
+                      className="text-berry hover:underline"
+                    >
+                      {formatSeconds(run.total_time_seconds)}
+                    </Link>
                   </td>
                   <td className="py-2 pr-2">{run.total_deaths}</td>
                   <td className="py-2 pr-2 text-muted truncate">{run.comment}</td>
                   <td className="py-2">
-                    <DeleteRunButton runId={run.id} gameSlug={gameSlug} />
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        href={`/${gameSlug}/runs/${run.id}/edit`}
+                        className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-muted hover:text-foreground transition p-2 md:p-1 rounded"
+                        title="Modifier"
+                        aria-label="Modifier cette run"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </Link>
+                      <DeleteRunButton runId={run.id} gameSlug={gameSlug} />
+                    </div>
                   </td>
                 </tr>
               );

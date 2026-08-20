@@ -150,6 +150,63 @@ export async function fetchUserRunsList(
   return ((runs ?? []) as RawRunRow[]).map(toCompareRunOption);
 }
 
+export type EditableRun = {
+  id: string;
+  run_date: string;
+  total_time_seconds: number;
+  total_deaths: number | null;
+  intro_time_seconds: number | null;
+  comment: string | null;
+  category_id: string | null;
+  category_name: string | null;
+  splits: { chapter_id: string; time_seconds: number | null; deaths: number | null }[];
+};
+
+export async function fetchOwnedRun(
+  supabase: SupabaseClient,
+  runId: string,
+  gameId: string,
+  userId: string
+): Promise<EditableRun | null> {
+  const { data: run } = await supabase
+    .from("runs")
+    .select(
+      "id, run_date, total_time_seconds, total_deaths, intro_time_seconds, comment, category_id, categories(name)"
+    )
+    .eq("id", runId)
+    .eq("game_id", gameId)
+    .eq("user_id", userId)
+    .single();
+
+  if (!run) return null;
+
+  const { data: splits } = await supabase
+    .from("run_splits")
+    .select("chapter_id, time_seconds, deaths")
+    .eq("run_id", runId);
+
+  const categories = run.categories as { name: string } | { name: string }[] | null;
+  const category_name = Array.isArray(categories)
+    ? categories[0]?.name ?? null
+    : categories?.name ?? null;
+
+  return {
+    id: run.id,
+    run_date: run.run_date,
+    total_time_seconds: Number(run.total_time_seconds),
+    total_deaths: run.total_deaths,
+    intro_time_seconds: run.intro_time_seconds != null ? Number(run.intro_time_seconds) : null,
+    comment: run.comment,
+    category_id: run.category_id,
+    category_name,
+    splits: (splits ?? []).map((s) => ({
+      chapter_id: s.chapter_id,
+      time_seconds: s.time_seconds != null ? Number(s.time_seconds) : null,
+      deaths: s.deaths,
+    })),
+  };
+}
+
 export function getSteamHeaderUrl(steamAppId: number | null | undefined) {
   return steamAppId
     ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${steamAppId}/header.jpg`
