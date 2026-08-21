@@ -11,7 +11,21 @@ export type RunListItem = {
   total_time_seconds: number;
   total_deaths: number | null;
   comment: string | null;
+  suspicious?: boolean;
+  suspiciousReason?: string | null;
 };
+
+function WarningIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+      />
+    </svg>
+  );
+}
 
 export function RunsList({
   runs,
@@ -23,6 +37,7 @@ export function RunsList({
   gameName: string;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
+  const suspiciousCount = runs.filter((r) => r.suspicious).length;
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -55,6 +70,15 @@ export function RunsList({
       {runs.length > 0 && (
         <p className="text-xs text-muted">
           Sélectionne une run pour la comparer à celle d&apos;un autre joueur, ou deux de tes runs entre elles.
+          {suspiciousCount > 0 && (
+            <>
+              {" "}
+              <span className="text-red-400">
+                {suspiciousCount} run{suspiciousCount > 1 ? "s" : ""} à vérifier
+              </span>
+              .
+            </>
+          )}
         </p>
       )}
 
@@ -87,7 +111,18 @@ export function RunsList({
           return (
             <div
               key={run.id}
-              className={`card card-mobile ${isSelected ? "ring-2 ring-berry/60" : ""}`}
+              className={`card card-mobile ${
+                isSelected
+                  ? "ring-2 ring-berry/60"
+                  : run.suspicious
+                    ? "ring-1 ring-red-400/50"
+                    : ""
+              }`}
+              style={
+                run.suspicious
+                  ? { background: "color-mix(in srgb, #f87171 8%, var(--card))" }
+                  : undefined
+              }
             >
               <div className="flex items-start gap-3">
                 {runs.length > 0 && (
@@ -102,7 +137,11 @@ export function RunsList({
                 <div className="min-w-0 flex-1">
                   <Link href={`/${gameSlug}/runs/${run.id}`} className="block group/link">
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className="font-mono text-lg font-bold text-berry group-hover/link:underline">
+                      <p
+                        className={`font-mono text-lg font-bold group-hover/link:underline ${
+                          run.suspicious ? "text-red-400" : "text-berry"
+                        }`}
+                      >
                         {formatSeconds(run.total_time_seconds)}
                       </p>
                       <span className="text-xs text-muted shrink-0">
@@ -111,7 +150,18 @@ export function RunsList({
                     </div>
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted mt-1">
                       <span>{run.total_deaths} morts</span>
+                      {run.suspicious && (
+                        <span className="inline-flex items-center gap-1 text-red-400 font-medium">
+                          <WarningIcon className="w-3.5 h-3.5" />
+                          À vérifier
+                        </span>
+                      )}
                     </div>
+                    {run.suspicious && (
+                      <p className="text-xs text-red-400/90 mt-1.5">
+                        Cette run semble incohérente.
+                      </p>
+                    )}
                     {run.comment && (
                       <p className="text-sm text-muted mt-2 line-clamp-2">{run.comment}</p>
                     )}
@@ -147,7 +197,10 @@ export function RunsList({
               return (
                 <tr
                   key={run.id}
-                  className={`border-b border-border last:border-0 group ${isSelected ? "bg-berry/5" : ""}`}
+                  className={`border-b border-border last:border-0 group ${
+                    isSelected ? "bg-berry/5" : run.suspicious ? "bg-red-500/5" : ""
+                  }`}
+                  title={run.suspiciousReason ?? undefined}
                 >
                   {runs.length > 0 && (
                     <td className="py-2 pr-2">
@@ -163,21 +216,28 @@ export function RunsList({
                   <td className="py-2 pr-2 truncate">
                     <Link
                       href={`/${gameSlug}/runs/${run.id}`}
-                      className="hover:text-berry transition"
+                      className="hover:text-berry transition inline-flex items-center gap-1.5"
                     >
+                      {run.suspicious && <WarningIcon className="w-3.5 h-3.5 text-red-400 shrink-0" />}
                       {new Date(run.run_date).toLocaleDateString("fr-FR")}
                     </Link>
                   </td>
                   <td className="py-2 pr-2 font-mono truncate">
                     <Link
                       href={`/${gameSlug}/runs/${run.id}`}
-                      className="text-berry hover:underline"
+                      className={`hover:underline ${run.suspicious ? "text-red-400 font-medium" : "text-berry"}`}
                     >
                       {formatSeconds(run.total_time_seconds)}
                     </Link>
                   </td>
                   <td className="py-2 pr-2">{run.total_deaths}</td>
-                  <td className="py-2 pr-2 text-muted truncate">{run.comment}</td>
+                  <td className="py-2 pr-2 text-muted truncate">
+                    {run.suspicious && !run.comment ? (
+                      <span className="text-red-400/90">Run incohérente</span>
+                    ) : (
+                      run.comment
+                    )}
+                  </td>
                   <td className="py-2">
                     <div className="flex items-center justify-end gap-1">
                       <Link

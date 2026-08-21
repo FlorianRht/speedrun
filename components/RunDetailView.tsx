@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DeleteRunButton } from "@/components/DeleteRunButton";
 import type { EditableRun } from "@/lib/game-data";
+import { checkRunTiming } from "@/lib/run-validation";
 import { formatSeconds } from "@/lib/time";
 
 type Chapter = { id: string; name: string; sort_order: number };
@@ -21,11 +22,16 @@ export function RunDetailView({
     run.intro_time_seconds != null ||
     run.splits.some((s) => s.time_seconds != null || (s.deaths != null && s.deaths > 0));
 
+  const timing = checkRunTiming(
+    run.total_time_seconds,
+    run.splits.map((s) => s.time_seconds)
+  );
+
   const segments: { name: string; time: number | null; deaths: number | null }[] = [];
   if (run.intro_time_seconds != null || hasAnySplit) {
     segments.push({
       name: "Intro",
-      time: run.intro_time_seconds,
+      time: timing.gapSeconds ?? run.intro_time_seconds,
       deaths: null,
     });
   }
@@ -64,11 +70,31 @@ export function RunDetailView({
         </div>
       </div>
 
-      <div className="card card-mobile space-y-4">
+      {!timing.ok && (
+        <div className="rounded-xl px-4 py-3 text-sm text-red-400 border border-red-400/30 bg-red-500/10">
+          <p className="font-medium">Run incohérente</p>
+          <p className="mt-1 opacity-90">
+            Cette run semble incohérente : vérifie le temps total et les splits.
+          </p>
+        </div>
+      )}
+
+      <div
+        className="card card-mobile space-y-4"
+        style={
+          !timing.ok
+            ? { borderColor: "color-mix(in srgb, #f87171 40%, var(--card-border))" }
+            : undefined
+        }
+      >
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs text-muted uppercase tracking-wide font-semibold">Temps total</p>
-            <p className="font-mono text-3xl font-bold text-berry mt-1">
+            <p
+              className={`font-mono text-3xl font-bold mt-1 ${
+                !timing.ok ? "text-red-400" : "text-berry"
+              }`}
+            >
               {formatSeconds(run.total_time_seconds)}
             </p>
           </div>
