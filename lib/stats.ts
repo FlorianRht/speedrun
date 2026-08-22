@@ -17,10 +17,18 @@ type Split = {
   deaths: number | null;
 };
 
+export type EvolutionPoint = {
+  date: string;
+  /** Temps en secondes */
+  value: number;
+  /** Morts sur la même run (total ou split selon la série) */
+  deaths?: number | null;
+};
+
 export type EvolutionSeries = {
   id: string;
   label: string;
-  points: { date: string; seconds: number }[];
+  points: EvolutionPoint[];
 };
 
 export type GameStats = {
@@ -62,7 +70,15 @@ export function computeGameStats(
   }));
 
   const evolutionSeries: EvolutionSeries[] = [
-    { id: "total", label: "Temps total", points: chartData },
+    {
+      id: "total",
+      label: "Temps total",
+      points: runs.map((r) => ({
+        date: new Date(r.run_date).toLocaleDateString("fr-FR"),
+        value: Number(r.total_time_seconds),
+        deaths: r.total_deaths != null ? Number(r.total_deaths) : null,
+      })),
+    },
   ];
 
   for (const chapter of chapters) {
@@ -74,13 +90,18 @@ export function computeGameStats(
         if (!split || split.time_seconds === null) return null;
         return {
           date: new Date(run.run_date).toLocaleDateString("fr-FR"),
-          seconds: Number(split.time_seconds),
+          value: Number(split.time_seconds),
+          deaths: split.deaths != null ? Number(split.deaths) : null,
         };
       })
-      .filter((p): p is { date: string; seconds: number } => p !== null);
+      .filter((p): p is EvolutionPoint => p !== null);
 
     if (points.length > 0) {
-      evolutionSeries.push({ id: chapter.id, label: chapter.name, points });
+      evolutionSeries.push({
+        id: chapter.id,
+        label: chapter.name,
+        points,
+      });
     }
   }
 
