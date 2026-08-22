@@ -34,7 +34,11 @@ export function StatsChart({
         {
           id: "total",
           label: "Temps total",
-          points: data.map((p) => ({ date: p.date, value: p.seconds })),
+          points: data.map((p) => ({
+            date: p.date,
+            value: p.seconds,
+            deaths: null,
+          })),
         },
       ];
     }

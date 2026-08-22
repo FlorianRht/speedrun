@@ -22,7 +22,7 @@ export type EvolutionPoint = {
   /** Temps en secondes */
   value: number;
   /** Morts sur la même run (total ou split selon la série) */
-  deaths?: number | null;
+  deaths: number | null;
 };
 
 export type EvolutionSeries = {
@@ -94,7 +94,7 @@ export function computeGameStats(
           deaths: split.deaths != null ? Number(split.deaths) : null,
         };
       })
-      .filter((p): p is EvolutionPoint => p !== null);
+      .filter((p): p is NonNullable<typeof p> => p !== null);
 
     if (points.length > 0) {
       evolutionSeries.push({
